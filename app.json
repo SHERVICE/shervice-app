@@ -1,5 +1,4 @@
 {
-  "$schema": "https://docs.expo.dev/schema/app.json",
   "expo": {
     "name": "app_homeservice",
     "slug": "app_homeservice",
@@ -9,6 +8,7 @@
     "scheme": "apphomeservice",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.shermon.shervice",
