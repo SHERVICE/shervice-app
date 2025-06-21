@@ -1,10 +1,11 @@
-import { Text, View } from 'react-native';
+import SafeAreaContainer from '@/components/SafeAreaContainer';
+import { Text } from 'react-native';
 
 function CategoriesScreen() {
   return (
-    <View>
+    <SafeAreaContainer>
       <Text>CategoriesScreen</Text>
-    </View>
+    </SafeAreaContainer>
   );
 }
 

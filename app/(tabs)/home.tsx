@@ -1,10 +1,11 @@
-import { Text, View } from 'react-native';
+import SafeAreaContainer from '@/components/SafeAreaContainer';
+import { Text } from 'react-native';
 
 function HomeScreen() {
   return (
-    <View>
+    <SafeAreaContainer>
       <Text>HomeScreen</Text>
-    </View>
+    </SafeAreaContainer>
   );
 }
 
