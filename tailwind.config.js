@@ -3,7 +3,15 @@ module.exports = {
   content: ['./app/**/*.{js,jsx,ts,tsx}', './components/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        poppins: 'PoppinsRegular',
+        poppinsMedium: 'PoppinsMedium',
+        poppinsSemiBold: 'PoppinsSemiBold',
+        poppinsBold: 'PoppinsBold',
+        poppinsLight: 'PoppinsLight',
+      },
+    },
   },
   plugins: [],
 };
