@@ -1,4 +1,4 @@
-import SafeAreaContainer from '@/components/SafeAreaContainer';
+import SafeAreaContainer from '@/app/_components/SafeAreaContainer';
 import { Text } from 'react-native';
 
 function BookingsScreen() {
