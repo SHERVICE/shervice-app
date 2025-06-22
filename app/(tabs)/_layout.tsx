@@ -10,7 +10,7 @@ import IconWithAnimatedTopBar from '../_components/TabBarIcon';
 const tabs = [
   { name: 'home', title: 'Início', icon: HomeIcon },
   { name: 'categories', title: 'Categorias', icon: CategoriesIcon },
-  { name: 'bookings', title: 'Agendamento', icon: BookingIcon },
+  { name: 'bookings', title: 'Agendamentos', icon: BookingIcon },
   { name: 'profile', title: 'Perfil', icon: ProfileIcon },
 ];
 
@@ -60,7 +60,6 @@ export default function TabLayout() {
     >
       {tabs.map((tab) => {
         const isActive = activeTab === tab.name;
-        console.log(isActive);
         return (
           <Tabs.Screen
             key={tab.name}
