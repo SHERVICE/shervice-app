@@ -1,5 +1,6 @@
 import { Colors } from '@/constants/Colors';
 import { Tabs, useSegments } from 'expo-router';
+import { Pressable } from 'react-native';
 import BookingIcon from '../../assets/icons/tabs/booking';
 import CategoriesIcon from '../../assets/icons/tabs/categories';
 import HomeIcon from '../../assets/icons/tabs/home';
@@ -31,6 +32,22 @@ export default function TabLayout() {
         tabBarLabelStyle: {
           fontSize: 11,
           fontFamily: 'PoppinsLight',
+        },
+        tabBarButton(props) {
+          return (
+            <Pressable
+              android_ripple={null} // sem ripple no Android
+              style={props.style}
+              onPress={props.onPress}
+              onLongPress={props.onLongPress}
+              accessibilityRole={props.accessibilityRole}
+              accessibilityState={props.accessibilityState}
+              accessibilityLabel={props.accessibilityLabel}
+              testID={props.testID}
+            >
+              {props.children}
+            </Pressable>
+          );
         },
       }}
     >
