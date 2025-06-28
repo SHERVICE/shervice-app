@@ -4,6 +4,7 @@ import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 
 /** Icons */
 import SearchIcon from '@/assets/icons/input/search';
+import { Dimensions } from '@/constants/Dimensions';
 import Animated, {
     interpolateColor,
     useAnimatedStyle,
@@ -11,10 +12,18 @@ import Animated, {
     withTiming,
 } from 'react-native-reanimated';
 
-interface InputProps extends TextInputProps {}
+enum InputVariant {
+    search = 'search'
+}
+interface InputProps extends TextInputProps {
+    size?: keyof typeof Dimensions,
+    variant?: keyof typeof InputVariant
+}
 
-function Input(props: InputProps) {
+function Input({ size = "medium", variant = InputVariant.search, ...rest }: InputProps) {
   const isFocused = useSharedValue(0);
+
+  const style = styles(size)
 
   const handleFocus = () => {
     isFocused.value = withTiming(1, { duration: 300 });
@@ -36,27 +45,29 @@ function Input(props: InputProps) {
   });
 
   return (
-    <Animated.View style={[styles.input, animatedBorderStyle]}>
-      <View style={styles.iconLeftArea}>
-        <SearchIcon />
+    <Animated.View style={[style.input, animatedBorderStyle]}>
+      {variant === InputVariant.search && (
+        <View style={style.iconLeftArea}>
+        <SearchIcon height={Dimensions[size] * 0.42} />
       </View>
+      )}
       <TextInput
-        style={[styles.field]}
+        style={[style.field]}
         placeholder="Buscar"
         placeholderTextColor={Colors.gray.gray80}
         onFocus={handleFocus}
         onBlur={handleBlur}
         autoCapitalize="none"
-        {...props}
+        {...rest}
       />
     </Animated.View>
   );
 }
 
-const styles = StyleSheet.create({
+const styles = (size: keyof typeof Dimensions) => StyleSheet.create({
   input: {
     width: '100%',
-    height: 50,
+    height: Dimensions[size],
     borderWidth: 1,
     borderColor: Colors.gray.gray10,
     borderRadius: 10,
@@ -65,16 +76,18 @@ const styles = StyleSheet.create({
   field: {
     flex: 1,
     width: '100%',
-    height: 50,
+    height: Dimensions[size],
     color: Colors.gray.gray80,
     fontSize: 16,
     fontFamily: 'PoppinsLight',
+    paddingLeft: 10,
   },
   iconLeftArea: {
-    width: 55,
-    height: 50,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    width: "auto",
+    height: Dimensions[size],
+    justifyContent: "center",
+    alignItems: "center",
+    paddingLeft: 16,
   },
 });
 

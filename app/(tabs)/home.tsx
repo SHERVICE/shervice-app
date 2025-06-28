@@ -4,9 +4,11 @@ import { Flex } from 'react-native-flex';
 import { Text, TouchableHighlight, View } from 'react-native';
 
 /** Icon */
+import Filter from '@/assets/icons/button/filter';
 import ArrowDown from '@/assets/icons/home/arrow-down.svg';
 import BellIcon from '@/assets/icons/home/bell.svg';
 import Cart from '@/assets/icons/home/cart.svg';
+import Button from '../_components/Button';
 import Input from '../_components/Input';
 
 function HomeScreen() {
@@ -34,8 +36,13 @@ function HomeScreen() {
             </Flex>
           </Flex>
         </TouchableHighlight>
-        <Flex fullWidth narrow mt={20}>
-          <Input />
+        <Flex fullWidth narrow mt={20} gap={8}>
+          <Flex>
+            <Input placeholder="O que você precisa?" />
+          </Flex>
+          <Flex narrow width={50}>
+            <Button iconLeft={<Filter />} />
+          </Flex>
         </Flex>
       </Flex>
     </SafeAreaContainer>
