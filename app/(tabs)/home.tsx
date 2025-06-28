@@ -7,6 +7,7 @@ import { Text, TouchableHighlight, View } from 'react-native';
 import ArrowDown from '@/assets/icons/home/arrow-down.svg';
 import BellIcon from '@/assets/icons/home/bell.svg';
 import Cart from '@/assets/icons/home/cart.svg';
+import Input from '../_components/Input';
 
 function HomeScreen() {
   return (
@@ -33,6 +34,9 @@ function HomeScreen() {
             </Flex>
           </Flex>
         </TouchableHighlight>
+        <Flex fullWidth narrow mt={20}>
+          <Input />
+        </Flex>
       </Flex>
     </SafeAreaContainer>
   );

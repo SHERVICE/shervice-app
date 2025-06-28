@@ -14,6 +14,11 @@ export const Colors = {
   gray500: '#A1A4A7',
   light500: '#D9E1E1',
   white: '#FFFFFF',
+  gray: {
+    gray05: '#A1A4A70D',
+    gray10: '#A1A4A71A',
+    gray80: '#A1A4A7CC',
+  },
   light: {
     text: '#11181C',
     background: '#fff',
