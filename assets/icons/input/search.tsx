@@ -2,7 +2,12 @@ import * as React from 'react';
 import { Path, Svg } from 'react-native-svg';
 
 const SearchIcon: React.FC<React.SVGProps<SVGElement>> = (props) => (
-  <Svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+  <Svg
+    width={props.width ?? '24'}
+    height={props.height ?? '24'}
+    fill="none"
+    viewBox="0 0 24 24"
+  >
     <Path
       stroke="#13171B"
       strokeLinecap="round"
