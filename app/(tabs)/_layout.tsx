@@ -17,11 +17,6 @@ const tabs = [
 export default function TabLayout() {
   const segments = useSegments();
 
-  /**
-   * IDENTIFIER PAGE
-   */
-  const activeTab = segments[segments.length - 1] || 'home';
-
   return (
     <Tabs
       screenOptions={{
@@ -59,6 +54,7 @@ export default function TabLayout() {
       }}
     >
       {tabs.map((tab) => {
+        const activeTab = segments.find((item) => item.includes(tab.name));
         const isActive = activeTab === tab.name;
         return (
           <Tabs.Screen
