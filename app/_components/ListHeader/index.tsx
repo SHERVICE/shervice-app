@@ -1,11 +1,7 @@
 import { Colors } from '@/constants/Colors';
-import {
-  StyleSheet,
-  Text,
-  TouchableHighlight,
-  TouchableHighlightProps,
-} from 'react-native';
+import { TouchableHighlight, TouchableHighlightProps } from 'react-native';
 import { Flex } from 'react-native-flex';
+import Heading from '../Heading';
 
 interface ListHeaderProps {
   title: string;
@@ -16,24 +12,16 @@ interface ListHeaderProps {
 function ListHeader({ title, subtitle, onPress }: ListHeaderProps) {
   return (
     <Flex narrow spaceBetween fullWidth vCentered>
-      <Text style={styles.title}>{title}</Text>
+      <Heading fontFamily="PoppinsBold" size={16}>
+        {title}
+      </Heading>
       <TouchableHighlight onPress={onPress} underlayColor="transparent">
-        <Text style={styles.subtitle}>{subtitle}</Text>
+        <Heading fontFamily="PoppinsRegular" size={14} color={Colors.primary}>
+          {subtitle}
+        </Heading>
       </TouchableHighlight>
     </Flex>
   );
 }
 
 export default ListHeader;
-
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 16,
-    fontFamily: 'PoppinsBold',
-  },
-  subtitle: {
-    fontSize: 14,
-    fontFamily: 'PoppinsRegular',
-    color: Colors.primary,
-  },
-});

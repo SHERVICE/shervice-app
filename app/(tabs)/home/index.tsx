@@ -2,9 +2,10 @@ import SafeAreaContainer from '@/app/_components/SafeAreaContainer';
 import { router } from 'expo-router';
 import { Flex } from 'react-native-flex';
 
-import { Text, TouchableHighlight, View } from 'react-native';
+import { TouchableHighlight, View } from 'react-native';
 
 /** Icon */
+import Heading from '@/app/_components/Heading';
 import Filter from '@/assets/icons/button/filter';
 import ArrowDown from '@/assets/icons/home/arrow-down.svg';
 import BellIcon from '@/assets/icons/home/bell.svg';
@@ -25,6 +26,7 @@ function HomeScreen() {
       console.log(error.request);
     }
   }, [error]);
+
   return (
     <SafeAreaContainer>
       <Flex p={[20, 20, 0, 20]} vertical>
@@ -34,11 +36,13 @@ function HomeScreen() {
               <BellIcon width={15} height={15} />
             </View>
             <Flex vertical gap={5}>
-              <Text className="text-xs font-poppinsLight">Meu endereço</Text>
+              <Heading size={12} fontFamily="PoppinsLight">
+                Meu endereço
+              </Heading>
               <Flex gap={5}>
-                <Text className="text-sm font-poppinsLight">
+                <Heading size={14} fontFamily="PoppinsLight">
                   Av. Perimetral - Bastiana
-                </Text>
+                </Heading>
                 <ArrowDown />
               </Flex>
             </Flex>
@@ -71,7 +75,12 @@ function HomeScreen() {
               figure={item.figure}
               key={key}
               index={key}
-              onPress={() => router.push('/(tabs)/home/category')}
+              onPress={() =>
+                router.push({
+                  pathname: '/(tabs)/home/category',
+                  params: { categoryId: item.id, title: item.title },
+                })
+              }
             />
           ))}
         </Flex>
