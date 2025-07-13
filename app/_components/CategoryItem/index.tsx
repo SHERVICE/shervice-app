@@ -3,10 +3,10 @@ import { Colors } from '@/constants/Colors';
 import { useEffect } from 'react';
 import { StyleSheet, Text, TouchableHighlight, TouchableHighlightProps, View } from 'react-native';
 import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withDelay,
-    withTiming,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
 } from 'react-native-reanimated';
 import { SvgUri } from 'react-native-svg';
 

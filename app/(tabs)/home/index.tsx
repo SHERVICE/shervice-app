@@ -6,10 +6,10 @@ import { TouchableHighlight, View } from 'react-native';
 
 /** Icon */
 import Heading from '@/app/_components/Heading';
+import Bell from '@/assets/header/bell';
 import Filter from '@/assets/icons/button/filter';
 import ArrowDown from '@/assets/icons/home/arrow-down.svg';
-import BellIcon from '@/assets/icons/home/bell.svg';
-import Cart from '@/assets/icons/home/cart.svg';
+import LocationIcon from '@/assets/icons/home/location.svg';
 import { useCategories } from '@/store/useCategories';
 import { AxiosError } from 'axios';
 import { useEffect } from 'react';
@@ -19,11 +19,14 @@ import Input from '../../_components/Input';
 import ListHeader from '../../_components/ListHeader';
 
 function HomeScreen() {
-  const { data: categories, error } = useCategories();
+  const { data: categories, error } = useCategories({
+    page: 1,
+    perPage: 8,
+  });
 
   useEffect(() => {
     if (error instanceof AxiosError) {
-      console.log(error.request);
+      console.log(error.response?.data);
     }
   }, [error]);
 
@@ -33,7 +36,7 @@ function HomeScreen() {
         <TouchableHighlight className="w-full">
           <Flex gap={10} narrow>
             <View className="w-[40px]	h-[40px] bg-primary5  rounded-[10] flex justify-center items-center">
-              <BellIcon width={15} height={15} />
+              <LocationIcon width={15} height={15} />
             </View>
             <Flex vertical gap={5}>
               <Heading size={12} fontFamily="PoppinsLight">
@@ -47,8 +50,13 @@ function HomeScreen() {
               </Flex>
             </Flex>
             <Flex narrow fullHeight vCentered>
-              <TouchableHighlight>
-                <Cart />
+              <TouchableHighlight className="w-[40px]	h-[40px] bg-primary5  rounded-[10] flex justify-center items-center">
+                <View className="relative">
+                  <View
+                    className={`w-2 h-2 bg-[#ED4C4C]  absolute rounded-full right-1 top-1 z-20`}
+                  ></View>
+                  <Bell />
+                </View>
               </TouchableHighlight>
             </Flex>
           </Flex>
@@ -69,7 +77,7 @@ function HomeScreen() {
           />
         </Flex>
         <Flex mt={20} gap={6} style={{ flexWrap: 'wrap' }} spaceBetween>
-          {categories?.map((item, key) => (
+          {categories?.data.slice(0, 8)?.map((item, key) => (
             <CategoryItem
               title={item.title}
               figure={item.figure}

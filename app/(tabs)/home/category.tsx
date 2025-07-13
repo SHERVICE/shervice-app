@@ -5,7 +5,7 @@ import Input from '@/app/_components/Input';
 import SafeAreaContainer from '@/app/_components/SafeAreaContainer';
 import Filter from '@/assets/icons/button/filter';
 import { Colors } from '@/constants/Colors';
-import { SubCategories, useSubCategories } from '@/store/useSubCategories';
+import { Categories, useCategories } from '@/store/useCategories';
 import { FlashList } from '@shopify/flash-list';
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
@@ -17,12 +17,12 @@ function Category() {
   const [search, setSeach] = useState<string>();
 
   const { categoryId, title } = useLocalSearchParams();
-  const { data: subCategories, refetch } = useSubCategories({
+  const { data: subCategories, refetch } = useCategories({
     categoryId: categoryId as string,
     title: search,
   });
 
-  const renderItem = (props: SubCategories) => {
+  const renderItem = (props: Categories) => {
     return (
       <TouchableHighlight style={styles.categoryItem}>
         <Flex vCentered gap={10}>
@@ -38,7 +38,7 @@ function Category() {
               fontFamily="PoppinsRegular"
               color={Colors.gray500}
             >
-              {`${props.quantityProvider} prestadore(s)`}
+              {`${props.quantityProvider} prestador`}
             </Heading>
           </View>
         </Flex>
