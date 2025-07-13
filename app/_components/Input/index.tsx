@@ -6,10 +6,10 @@ import { StyleSheet, TextInput, TextInputProps, View } from 'react-native';
 import SearchIcon from '@/assets/icons/input/search';
 import { Dimensions } from '@/constants/Dimensions';
 import Animated, {
-    interpolateColor,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 
 enum InputVariant {
@@ -84,7 +84,7 @@ const styles = (size: keyof typeof Dimensions) => StyleSheet.create({
   },
   iconLeftArea: {
     width: "auto",
-    height: Dimensions[size],
+    height: "100%",
     justifyContent: "center",
     alignItems: "center",
     paddingLeft: 16,
