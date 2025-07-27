@@ -16,7 +16,7 @@ import { SvgUri } from 'react-native-svg';
 function CategoryScreen() {
   const [search, setSeach] = useState<string>();
 
-  const { categoryId, title } = useLocalSearchParams();
+  const { categoryId } = useLocalSearchParams();
   const { data: subCategories, refetch } = useCategories({
     categoryId: categoryId as string,
     title: search,

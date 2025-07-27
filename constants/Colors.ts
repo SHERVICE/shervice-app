@@ -19,6 +19,7 @@ export const Colors = {
     gray05: '#A1A4A70D',
     gray10: '#A1A4A71A',
     gray80: '#A1A4A7CC',
+    gray20: '#A1A4A733',
   },
   light: {
     text: '#11181C',

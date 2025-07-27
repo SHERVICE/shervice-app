@@ -1,6 +1,6 @@
 import { Colors } from '@/constants/Colors';
 import { useMemo } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, TextStyle } from 'react-native';
 
 export enum FontFamily {
   PoppinsRegular = 'PoppinsRegular',
@@ -14,9 +14,10 @@ type FontType = keyof typeof FontFamily;
 
 interface HeadingProps {
   fontFamily?: FontType;
+  align?: TextStyle['textAlign'];
   size?: number;
   color?: string;
-  children?: string;
+  children?: string[] | string;
 }
 
 export default function Heading({ children, ...rest }: HeadingProps) {
@@ -31,5 +32,6 @@ const getStyles = (style: HeadingProps) =>
       fontFamily: style.fontFamily ?? 'PoppinsMedium',
       fontSize: style?.size ?? 16,
       color: style.color ?? Colors.black,
+      textAlign: style.align ?? 'auto',
     },
   });
