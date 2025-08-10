@@ -4,6 +4,7 @@ import { Link } from 'expo-router';
 import { Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Flex } from 'react-native-flex';
 import Button from '../_components/Button';
+import Header from '../_components/Header';
 import Heading from '../_components/Heading';
 import Input from '../_components/Input';
 import SafeAreaContainer from '../_components/SafeAreaContainer';
@@ -12,8 +13,11 @@ import LoginButtonSocial from './_components/login-button-social';
 export default function Signin() {
   return (
     <SafeAreaContainer>
+      <Flex p={[0, 20]} narrow>
+        <Header />
+      </Flex>
       <ScrollView>
-        <Flex vertical gap={2} p={[0, 20]} mt={63}>
+        <Flex vertical gap={2} p={[0, 20]} mt={50}>
           <Flex fullWidth centered mb={30}>
             <Image
               source={require('@/assets/images/logo.png')}
@@ -38,8 +42,8 @@ export default function Signin() {
             <Flex vertical gap={10} fullWidth narrow>
               {Platform.OS === 'ios' ? (
                 <>
-                  <LoginButtonSocial type="APPLE" />
-                  <LoginButtonSocial type="GOOGLE" />
+                  <LoginButtonSocial type="APPLE" title="Entrar com Apple" />
+                  <LoginButtonSocial type="GOOGLE" title="Entrar com Google" />
                 </>
               ) : (
                 <>
@@ -73,7 +77,7 @@ export default function Signin() {
                 size="large"
               />
               <Flex narrow end fullWidth>
-                <Link href="/(auth)/signup" style={styles.link}>
+                <Link href="/(auth)/signup" style={styles.link} push>
                   Esqueceu a senha?
                 </Link>
               </Flex>
@@ -82,7 +86,7 @@ export default function Signin() {
                 <Heading size={14} fontFamily="PoppinsRegular">
                   Não possui conta?
                 </Heading>
-                <Link href="/(auth)/signup" style={styles.link}>
+                <Link href="/(auth)/signup" style={styles.link} push>
                   Cadastrar
                 </Link>
               </Flex>

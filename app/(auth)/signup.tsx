@@ -1,10 +1,171 @@
-import { Link } from 'expo-router';
-import { View } from 'react-native';
+import { Colors } from '@/constants/Colors';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Link, useRouter } from 'expo-router';
+import { Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
+import { Flex } from 'react-native-flex';
+import Button from '../_components/Button';
+import Heading from '../_components/Heading';
+import Input from '../_components/Input';
+import SafeAreaContainer from '../_components/SafeAreaContainer';
+import LoginButtonSocial from './_components/login-button-social';
+
+import { storage } from '@/utils/storage';
+import { Controller, useForm } from 'react-hook-form';
+import { useMMKVString } from 'react-native-mmkv';
+import { z } from 'zod';
+import Header from '../_components/Header';
+
+const SignupSchemaFirstStep = z.object({
+  password: z.string({ error: 'Informe sua senha' }),
+  email: z.email({ error: 'Email inválido' }),
+});
+
+type SignupValidationFirstStep = z.infer<typeof SignupSchemaFirstStep>;
 
 export default function Signup() {
+  const [user] = useMMKVString('user');
+
+  const { email, password } = JSON.parse(user || '{}');
+
+  const router = useRouter();
+
+  const { control, handleSubmit } = useForm<SignupValidationFirstStep>({
+    mode: 'all',
+    resolver: zodResolver(SignupSchemaFirstStep),
+    defaultValues: {
+      password,
+      email,
+    },
+  });
+
+  const onSubmit = handleSubmit((data) => {
+    const user = {
+      password: data.password,
+      email: data.email,
+    };
+    storage.set('user', JSON.stringify(user));
+    router.navigate('/(auth)/onboarding');
+  });
+
   return (
-    <View className="flex-1 bg-red-300 justify-center items-center">
-      <Link href="/(auth)/signin">Para signin</Link>
-    </View>
+    <SafeAreaContainer>
+      <Flex p={[0, 20]} narrow>
+        <Header />
+      </Flex>
+      <ScrollView>
+        <Flex vertical gap={2} p={[0, 20]} mt={53}>
+          <Flex fullWidth centered mb={30}>
+            <Image
+              source={require('@/assets/images/logo.png')}
+              width={80}
+              height={80}
+            />
+          </Flex>
+          <Flex narrow centered fullWidth vertical mb={20} gap={10}>
+            <Heading fontFamily="PoppinsBold" size={24}>
+              Criar Conta
+            </Heading>
+            <Heading
+              fontFamily="PoppinsRegular"
+              size={14}
+              color={Colors.gray500}
+              align="center"
+            >
+              Seja para contratar ou oferecer, cadastre-se e faça acontecer.
+            </Heading>
+          </Flex>
+          <Flex gap={20} vertical fullWidth>
+            <Flex vertical gap={16} fullWidth>
+              <Controller
+                control={control}
+                name="email"
+                render={({
+                  field: { onBlur, onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <Input
+                    variant="default"
+                    placeholder="Seu email"
+                    size="large"
+                    keyboardType="email-address"
+                    onBlur={onBlur}
+                    autoCapitalize="none"
+                    onChangeText={onChange}
+                    value={value}
+                    error={error?.message}
+                  />
+                )}
+              />
+              <Controller
+                control={control}
+                name="password"
+                render={({
+                  field: { onBlur, onChange, value },
+                  formState: { errors },
+                }) => (
+                  <Input
+                    keyboardType="default"
+                    placeholder="*****"
+                    secureTextEntry
+                    variant="password"
+                    onChangeText={onChange}
+                    onBlur={onBlur}
+                    value={value}
+                    error={errors.password?.message}
+                  />
+                )}
+              />
+              <Button title="Continuar" onPress={onSubmit} />
+            </Flex>
+          </Flex>
+          <Flex narrow fullWidth centered vCentered gap={10} m={[20, 0]}>
+            <View className="flex-1 h-[1px]" style={styles.divider} />
+            <Heading
+              fontFamily="PoppinsRegular"
+              size={14}
+              color={Colors.gray500}
+            >
+              Ou
+            </Heading>
+            <View className="flex-1 h-[1px]" style={styles.divider} />
+          </Flex>
+          <Flex gap={10} fullWidth narrow mb={20}>
+            {Platform.OS === 'ios' ? (
+              <>
+                <Flex>
+                  <LoginButtonSocial type="APPLE" title="Apple" />
+                </Flex>
+                <Flex>
+                  <LoginButtonSocial type="GOOGLE" title="Google" />
+                </Flex>
+              </>
+            ) : (
+              <>
+                <LoginButtonSocial type="GOOGLE" />
+              </>
+            )}
+          </Flex>
+        </Flex>
+        <Flex narrow centered fullWidth gap={5}>
+          <Heading size={14} fontFamily="PoppinsRegular">
+            Já tem uma conta?
+          </Heading>
+          <Link href="/(auth)/signin" style={styles.link}>
+            Entrar
+          </Link>
+        </Flex>
+      </ScrollView>
+    </SafeAreaContainer>
   );
 }
+
+export const styles = StyleSheet.create({
+  divider: {
+    backgroundColor: Colors.gray.gray20,
+  },
+  link: {
+    color: Colors.primary,
+    fontSize: 14,
+    fontFamily: 'PoppinsRegular',
+  },
+});

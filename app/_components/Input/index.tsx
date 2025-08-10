@@ -1,7 +1,11 @@
 import { Colors } from '@/constants/Colors';
+import * as Haptics from 'expo-haptics';
 import {
+  NativeSyntheticEvent,
   StyleSheet,
   TextInput,
+  TextInputChangeEventData,
+  TextInputFocusEventData,
   TextInputProps,
   TouchableHighlight,
   View,
@@ -14,14 +18,17 @@ import Eye from '@/assets/icons/input/view.svg';
 
 import { Dimensions } from '@/constants/Dimensions';
 import Animated, {
+  FadeIn,
+  FadeOut,
   interpolateColor,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import MaskInput, { Mask } from 'react-native-mask-input';
+import Heading from '../Heading';
 
 enum InputVariant {
   search = 'search',
@@ -31,12 +38,15 @@ enum InputVariant {
 interface InputProps extends TextInputProps {
   size?: keyof typeof Dimensions;
   variant?: keyof typeof InputVariant;
+  error?: string;
   mask?: Mask;
 }
 
 function Input({
   size = 'medium',
   variant = InputVariant.search,
+  error,
+  onBlur,
   mask,
   ...rest
 }: InputProps) {
@@ -53,27 +63,55 @@ function Input({
     isFocused.value = withTiming(1, { duration: 300 });
   };
 
-  const handleBlur = () => {
+  const handleBlur = (e: NativeSyntheticEvent<TextInputFocusEventData>) => {
     isFocused.value = withTiming(0, { duration: 300 });
+    onBlur && onBlur(e);
   };
 
   const onChangeText = (text: string) => {
     setValue(text);
   };
 
+  const onChangeTextMask = (masked: string, unmasked: string) => {
+    setValue(masked);
+  };
+
+  const onChange = (e: NativeSyntheticEvent<TextInputChangeEventData>) => {
+    rest.onChange?.(e);
+  };
+
   const animatedBorderStyle = useAnimatedStyle(() => {
-    const borderColor = interpolateColor(
-      isFocused.value,
-      [0, 1],
-      [Colors.gray.gray10, Colors.primary],
-    );
+    const borderColor = error
+      ? '#EF4444'
+      : interpolateColor(
+          isFocused.value,
+          [0, 1],
+          [Colors.gray.gray10, Colors.primary],
+        );
     return {
       borderColor,
     };
   });
 
+  useEffect(() => {
+    if (error) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+    }
+  }, [error]);
+
   return (
     <Animated.View style={[style.input, animatedBorderStyle]}>
+      {error && (
+        <Animated.View
+          style={style.errorArea}
+          entering={FadeIn.duration(300)}
+          exiting={FadeOut.duration(300)}
+        >
+          <Heading size={12} color={Colors.red}>
+            {error}
+          </Heading>
+        </Animated.View>
+      )}
       {variant === InputVariant.search && (
         <View style={style.iconLeftArea}>
           <SearchIcon height={Dimensions[size] * 0.42} />
@@ -85,8 +123,9 @@ function Input({
           mask={mask}
           value={value}
           onFocus={handleFocus}
-          onBlur={handleBlur}
-          onChangeText={(masked) => onChangeText(masked)}
+          onBlur={(e) => handleBlur(e)}
+          onChangeText={onChangeTextMask}
+          onChange={onChange}
           {...rest}
           secureTextEntry={securityText}
         />
@@ -101,6 +140,7 @@ function Input({
           onBlur={handleBlur}
           autoCapitalize="none"
           onChangeText={onChangeText}
+          onChange={onChange}
           {...rest}
           secureTextEntry={securityText}
         />
@@ -130,6 +170,7 @@ const styles = ({ size = 'large', variant }: InputProps) =>
       borderColor: Colors.gray.gray10,
       borderRadius: 10,
       flexDirection: 'row',
+      position: 'relative',
     },
     field: {
       flex: 1,
@@ -153,6 +194,15 @@ const styles = ({ size = 'large', variant }: InputProps) =>
       justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: 16,
+    },
+    errorArea: {
+      position: 'absolute',
+      bottom: -9,
+      right: 15,
+      paddingHorizontal: 5,
+      zIndex: 999,
+      backgroundColor: Colors.white,
+      color: Colors.red,
     },
   });
 

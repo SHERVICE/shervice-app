@@ -17,9 +17,11 @@ enum Social {
 
 interface ButtonSocialProps extends TouchableHighlightProps {
   type: keyof typeof Social;
+  title?: string;
 }
 
 export default function LoginButtonSocial({
+  title,
   type,
   ...rest
 }: ButtonSocialProps) {
@@ -34,7 +36,7 @@ export default function LoginButtonSocial({
         {social === Social.GOOGLE && <Google width={20} height={20} />}
         {social === Social.APPLE && <AppleIcon width={20} height={20} />}
         <Heading fontFamily="PoppinsRegular" color={Colors.black} size={16}>
-          Entrar com {social}
+          {title}
         </Heading>
       </View>
     </TouchableHighlight>
@@ -45,6 +47,7 @@ const styles = StyleSheet.create({
   button: {
     height: 56,
     width: '100%',
+    flex: 1,
     borderWidth: 1,
     borderColor: Colors.gray.gray20,
     borderRadius: 10,

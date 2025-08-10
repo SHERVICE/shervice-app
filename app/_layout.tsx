@@ -12,7 +12,9 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { requestAndGetLocation } from '@/utils/locale';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useEffect } from 'react';
 
 const queryClient = new QueryClient();
 
@@ -25,6 +27,10 @@ export default function RootLayout() {
     PoppinsBold: require('../assets/fonts/Poppins-Bold.ttf'),
     PoppinsLight: require('../assets/fonts/Poppins-Light.ttf'),
   });
+
+  useEffect(() => {
+    requestAndGetLocation();
+  }, []);
 
   if (!loaded) {
     return null;
