@@ -1,9 +1,9 @@
-import { LocationProvider } from '@/context/location';
+import { SignupProvider } from '@/context/signup';
 import { Stack } from 'expo-router';
 
 export default function Auth() {
   return (
-    <LocationProvider>
+    <SignupProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="signup" />
         <Stack.Screen name="signin" />
@@ -16,6 +16,6 @@ export default function Auth() {
           }}
         />
       </Stack>
-    </LocationProvider>
+    </SignupProvider>
   );
 }

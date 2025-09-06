@@ -1,11 +1,15 @@
-import { storage } from '@/utils/storage';
+import { useSignup } from '@/context/signup';
+import { SigninType } from '@/schemas/signin';
+import { UserResponse, useSignupMutation } from '@/store/users/useSignup';
+import { cleanNumber } from '@/utils/cleanNumber';
+import { ErrorsEnum } from '@/utils/errors';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AxiosError } from 'axios';
 import { useNavigation } from 'expo-router';
-import { useRef, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FlatList } from 'react-native';
 import { Flex } from 'react-native-flex';
-import { useMMKVString } from 'react-native-mmkv';
+import { useMMKVObject } from 'react-native-mmkv';
 import {
   SignupConbinedSchema,
   stepFields,
@@ -13,6 +17,7 @@ import {
 } from '../../schemas/signup';
 import Button from '../_components/Button';
 import SafeAreaContainer from '../_components/SafeAreaContainer';
+import { Toast } from '../_components/Toast';
 import FirstStep from './_components/onboarding/first-step';
 import SecondStep from './_components/onboarding/second-step';
 import ThirdStep from './_components/onboarding/third-step';
@@ -25,18 +30,14 @@ const steps = [
 ];
 
 export default function OnBoarding() {
-  const [currentStep, setCurrentStep] = useState(0);
-  const flashListRef = useRef<FlatList<any>>(null);
+  const { currentStep, setCurrentStep, flashListRef } = useSignup();
+
+  const { mutateAsync: signupMutationAsyn, isPending } = useSignupMutation();
 
   const navigate = useNavigation();
 
-  /**
-   * Values filled prev step
-   */
-
-  const [user] = useMMKVString('user');
-
-  const { email, password } = JSON.parse(user || '');
+  const [user] = useMMKVObject<SigninType>('user');
+  const [account, setAccount] = useMMKVObject<UserResponse>('account');
 
   const methods = useForm({
     mode: 'onChange',
@@ -44,12 +45,32 @@ export default function OnBoarding() {
     defaultValues: {
       isProvider: false,
       hasCNPJ: false,
-      email,
-      password,
+      email: user?.email,
+      password: user?.password,
+      code: ['', '', '', '', '', ''],
     },
   });
 
   const values = methods.watch();
+
+  const createUserInSecondStep = async () => {
+    const values = methods.getValues();
+    const data = await signupMutationAsyn({
+      name: values.name,
+      cpfCnpj: cleanNumber(values.cpfCnpj),
+      email: values.email,
+      address: {
+        city: values.city,
+        street: values.street ?? '',
+        zipcode: cleanNumber(values.zipcode ?? ''),
+      },
+      password: values.password,
+      phone: cleanNumber(values.phone),
+      serviceProvider: values.isProvider ?? false,
+    });
+
+    setAccount(data);
+  };
 
   const next = async () => {
     if (currentStep < steps.length - 1) {
@@ -61,7 +82,26 @@ export default function OnBoarding() {
           : stepFields;
 
       const valid = await methods.trigger(stepField[currentStep]);
+
       if (valid) {
+        if (currentStep === 1 && !account) {
+          try {
+            await createUserInSecondStep();
+          } catch (err: any) {
+            const code = err?.response?.data.code;
+            const error = err?.response?.data.error;
+            if (err instanceof AxiosError) {
+              if (code === ErrorsEnum.PHONE_ALREADY_EXISTS) {
+                methods.setError('phone', {
+                  message: 'Esse número já está em uso',
+                });
+                return;
+              }
+            }
+            Toast.error(error || 'Aconteceu algo de errado, tente novamente!');
+            return;
+          }
+        }
         setCurrentStep(newIndex);
         flashListRef.current?.scrollToIndex({
           index: newIndex,
@@ -81,26 +121,6 @@ export default function OnBoarding() {
       setCurrentStep(newIndex);
       flashListRef.current?.scrollToIndex({ index: newIndex, animated: true });
     }
-
-    persistData(currentStep);
-  };
-
-  const persistData = (step: number) => {
-    const userData = JSON.parse(user || '');
-    const updateUser = {
-      ...userData,
-      name: values.name,
-      isProvider: !!values.isProvider,
-      phone: values.phone,
-      ...(values.isProvider && {
-        cpfCnpj: values.cpfCnpj,
-      }),
-    };
-    switch (step) {
-      case 1:
-        storage.set('user', JSON.stringify(updateUser));
-        break;
-    }
   };
 
   return (
@@ -114,7 +134,7 @@ export default function OnBoarding() {
             <FlatList
               ref={flashListRef}
               data={steps}
-              // keyExtractor={(item) => item.key}
+              keyExtractor={(item) => item.key}
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
@@ -124,14 +144,16 @@ export default function OnBoarding() {
           </Flex>
         </FormProvider>
 
-        <Flex fullWidth p={[40, 20]} gap={10} vEnd narrow>
-          <Flex>
-            <Button title="Voltar" onPress={prev} />
+        {currentStep < 2 && (
+          <Flex fullWidth p={[40, 20]} gap={10} vEnd narrow>
+            <Flex>
+              <Button title="Voltar" onPress={prev} type="outlined" />
+            </Flex>
+            <Flex>
+              <Button title="Próximo" onPress={next} disabled={isPending} />
+            </Flex>
           </Flex>
-          <Flex>
-            <Button title="Próximo" onPress={next} />
-          </Flex>
-        </Flex>
+        )}
       </Flex>
     </SafeAreaContainer>
   );

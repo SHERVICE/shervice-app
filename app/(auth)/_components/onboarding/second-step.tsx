@@ -1,7 +1,7 @@
 import Button from '@/app/_components/Button';
 import Heading from '@/app/_components/Heading';
 import Input from '@/app/_components/Input';
-import { useLocation } from '@/context/location';
+import { useSignup } from '@/context/signup';
 import { SignupValidationCombinedStep } from '@/schemas/signup';
 import { requestAndGetLocation } from '@/utils/locale';
 import { useRouter } from 'expo-router';
@@ -15,7 +15,7 @@ const { width } = Dimensions.get('window');
 
 export default function SecondStep() {
   const { control, setValue } = useFormContext<SignupValidationCombinedStep>();
-  const { coords } = useLocation();
+  const { coords } = useSignup();
 
   const router = useRouter();
 

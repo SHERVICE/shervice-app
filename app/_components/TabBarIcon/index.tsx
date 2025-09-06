@@ -3,9 +3,9 @@ import { Colors } from '@/constants/Colors';
 import React, { useEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, {
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
 } from 'react-native-reanimated';
 
 type IconWithAnimatedTopBarProps = {
@@ -20,6 +20,7 @@ function IconWithAnimatedTopBar({
 
   const width = useSharedValue(0);
 
+
   useEffect(() => {
     width.value = withTiming(active ? 1 : 0, { duration: 250 });
   }, [active]);
@@ -27,6 +28,7 @@ function IconWithAnimatedTopBar({
   const animatedStyle = useAnimatedStyle(() => ({
     width: width.value * 24,
   }));
+
 
   return (
     <View style={styles.container}>
@@ -43,7 +45,7 @@ const styles = StyleSheet.create({
   },
   topBar: {
     position: 'absolute',
-    top: -15,
+    top: -14,
     height: 2,
     width: 24,
     backgroundColor: Colors.primary,

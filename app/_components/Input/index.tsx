@@ -26,7 +26,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
-import { useEffect, useState } from 'react';
+import { useTheme } from '@/context/theme-provider';
+import { forwardRef, useEffect, useState } from 'react';
 import MaskInput, { Mask } from 'react-native-mask-input';
 import Heading from '../Heading';
 
@@ -34,7 +35,16 @@ enum InputVariant {
   search = 'search',
   default = 'default',
   password = 'password',
+  otp = 'otp',
 }
+
+enum InputPadding {
+  default = 20,
+  otp = 15,
+  search = 10,
+  password = 10,
+}
+
 interface InputProps extends TextInputProps {
   size?: keyof typeof Dimensions;
   variant?: keyof typeof InputVariant;
@@ -42,18 +52,26 @@ interface InputProps extends TextInputProps {
   mask?: Mask;
 }
 
-function Input({
-  size = 'medium',
-  variant = InputVariant.search,
-  error,
-  onBlur,
-  mask,
-  ...rest
-}: InputProps) {
+function Input(
+  {
+    size = 'medium',
+    variant = InputVariant.search,
+    error,
+    onBlur,
+    mask,
+    ...rest
+  }: InputProps,
+  ref: React.Ref<TextInput>,
+) {
   const [value, setValue] = useState<string>();
   const [securityText, setSecurityText] = useState(
     rest.secureTextEntry ?? false,
   );
+
+  const {
+    isDark,
+    theme: { colors },
+  } = useTheme();
 
   const isFocused = useSharedValue(0);
 
@@ -103,23 +121,29 @@ function Input({
     <Animated.View style={[style.input, animatedBorderStyle]}>
       {error && (
         <Animated.View
-          style={style.errorArea}
+          style={[style.errorArea, { backgroundColor: colors.background }]}
           entering={FadeIn.duration(300)}
           exiting={FadeOut.duration(300)}
         >
-          <Heading size={12} color={Colors.red}>
+          <Heading size={12} color={Colors.red} style={{ color: Colors.red }}>
             {error}
           </Heading>
         </Animated.View>
       )}
       {variant === InputVariant.search && (
         <View style={style.iconLeftArea}>
-          <SearchIcon height={Dimensions[size] * 0.42} />
+          <SearchIcon
+            height={Dimensions[size] * 0.42}
+            color={isDark ? Colors.white : undefined}
+          />
         </View>
       )}
       {mask && (
         <MaskInput
-          style={[style.field]}
+          style={[
+            style.field,
+            { color: isDark ? Colors.white : Colors.gray.gray80 },
+          ]}
           mask={mask}
           value={value}
           onFocus={handleFocus}
@@ -132,8 +156,10 @@ function Input({
       )}
       {!mask && (
         <TextInput
-          style={[style.field]}
-          placeholder="Buscar"
+          style={[
+            style.field,
+            { color: isDark ? Colors.white : Colors.gray.gray80 },
+          ]}
           value={value}
           placeholderTextColor={Colors.gray.gray80}
           onFocus={handleFocus}
@@ -141,6 +167,7 @@ function Input({
           autoCapitalize="none"
           onChangeText={onChangeText}
           onChange={onChange}
+          ref={ref}
           {...rest}
           secureTextEntry={securityText}
         />
@@ -179,7 +206,12 @@ const styles = ({ size = 'large', variant }: InputProps) =>
       color: Colors.gray.gray80,
       fontSize: 16,
       fontFamily: 'PoppinsLight',
-      paddingLeft: variant === InputVariant.search ? 10 : 20,
+      paddingLeft: InputPadding[variant ?? 'default'],
+      ...(variant === 'otp' && {
+        color: Colors.black,
+        fontSize: 28,
+        fontFamily: 'PoppinsBold',
+      }),
     },
     iconLeftArea: {
       width: 'auto',
@@ -206,4 +238,4 @@ const styles = ({ size = 'large', variant }: InputProps) =>
     },
   });
 
-export default Input;
+export default forwardRef<TextInput, InputProps>(Input);

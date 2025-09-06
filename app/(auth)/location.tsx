@@ -1,5 +1,7 @@
-import { useLocation } from '@/context/location';
+import { Colors } from '@/constants/Colors';
+import { useSignup } from '@/context/signup';
 import { requestAndGetLocation } from '@/utils/locale';
+import { useTheme } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 import { useEffect, useRef, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
@@ -17,11 +19,9 @@ Geocoder.init('AIzaSyDMeGV6pQc-UECRzYUZ5NX6typIAfgu6oo');
 export default function Location() {
   const [adressFormated, setAddressFormated] = useState('');
 
-  /**
-   * Context
-   */
+  const { colors } = useTheme();
 
-  const { setAddress, setCoords, coords } = useLocation();
+  const { setAddress, setCoords, coords } = useSignup();
   const mapRef = useRef<MapView>(null);
 
   const insets = useSafeAreaInsets();
@@ -143,10 +143,12 @@ export default function Location() {
         >
           <Marker coordinate={markerPosition} draggable onDragEnd={onDragEnd} />
         </MapView>
-        <View style={styles.locateInfo}>
+        <View
+          style={[styles.locateInfo, { backgroundColor: colors.background }]}
+        >
           <Flex vertical gap={10}>
             <Flex centered narrow fullWidth>
-              <Heading>Localicazão Atual</Heading>
+              <Heading color={Colors.red}>Localicazão Atual</Heading>
             </Flex>
             <Flex narrow gap={10}>
               <LottieView
@@ -186,5 +188,10 @@ const getStyles = (paddingBottom: number) =>
       paddingBottom: paddingBottom,
       paddingTop: 20,
       bottom: 0,
+      elevation: 3,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
     },
   });

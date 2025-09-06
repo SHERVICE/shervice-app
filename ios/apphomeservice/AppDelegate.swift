@@ -14,7 +14,6 @@ public class AppDelegate: ExpoAppDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
-    GMSServices.provideAPIKey("AIzaSyDMeGV6pQc-UECRzYUZ5NX6typIAfgu6oo")
     let delegate = ReactNativeDelegate()
     let factory = ExpoReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
@@ -31,7 +30,12 @@ public class AppDelegate: ExpoAppDelegate {
       launchOptions: launchOptions)
 #endif
 
+    GMSServices.provideAPIKey("AIzaSyDMeGV6pQc-UECRzYUZ5NX6typIAfgu6oo")
+
+
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+
+
   }
 
   // Linking API

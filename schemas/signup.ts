@@ -40,7 +40,7 @@ const secondStepSignup = z.object({
 });
 
 const thirdStepSignup = z.object({
-  phoneCode: z.string().length(6, 'Código deve ter 6 dígitos'),
+  code: z.array(z.string()).length(6, 'Código deve ter 6 dígitos'),
 });
 
 export const SignupConbinedSchema = firstStepSignup
@@ -52,10 +52,11 @@ export type SignupValidationCombinedStep = z.infer<typeof SignupConbinedSchema>;
 export const stepFields = [
   ['name', 'phone', 'isProvider'],
   ['city', 'state', 'street', 'zipcode', 'number'],
-  ['phoneCode'],
+  ['code'],
 ] as const;
 
 export const stepFieldsWithCPFCNPJ = [
   ['name', 'phone', 'isProvider', 'cpfCnpj'],
   ['city', 'state', 'street', 'zipcode', 'number'],
+  ['code'],
 ] as const;

@@ -7,8 +7,9 @@ import {
   View,
 } from 'react-native';
 
-import AppleIcon from '@/assets/icons/button/apple.svg';
-import Google from '@/assets/icons/button/google.svg';
+import AppleIcon from '@/assets/icons/button/apple';
+import Google from '@/assets/icons/button/google';
+import { useTheme } from '@/context/theme-provider';
 
 enum Social {
   APPLE = 'Apple',
@@ -26,6 +27,8 @@ export default function LoginButtonSocial({
   ...rest
 }: ButtonSocialProps) {
   const social = Social[type];
+
+  const { isDark } = useTheme();
   return (
     <TouchableHighlight
       style={styles.button}
@@ -34,8 +37,14 @@ export default function LoginButtonSocial({
     >
       <View style={styles.content}>
         {social === Social.GOOGLE && <Google width={20} height={20} />}
-        {social === Social.APPLE && <AppleIcon width={20} height={20} />}
-        <Heading fontFamily="PoppinsRegular" color={Colors.black} size={16}>
+        {social === Social.APPLE && (
+          <AppleIcon
+            width={20}
+            height={20}
+            color={isDark ? Colors.white : undefined}
+          />
+        )}
+        <Heading fontFamily="PoppinsRegular" size={16}>
           {title}
         </Heading>
       </View>

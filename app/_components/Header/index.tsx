@@ -1,4 +1,5 @@
 import PrevIcon from '@/assets/header/prev';
+import { useTheme } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { StyleSheet, TouchableHighlight, View } from 'react-native';
 import Heading from '../Heading';
@@ -9,6 +10,8 @@ export interface HeaderProps {
 
 export default function Header({ title }: HeaderProps) {
   const navigate = useNavigation();
+
+  const { colors } = useTheme();
 
   const onPressBack = () => {
     navigate.goBack();
@@ -22,7 +25,7 @@ export default function Header({ title }: HeaderProps) {
           onPress={onPressBack}
           underlayColor="transparent"
         >
-          <PrevIcon />
+          <PrevIcon color={colors.text} />
         </TouchableHighlight>
       </View>
       <Heading fontFamily="PoppinsBold" size={16}>

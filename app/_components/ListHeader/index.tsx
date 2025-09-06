@@ -16,7 +16,12 @@ function ListHeader({ title, subtitle, onPress }: ListHeaderProps) {
         {title}
       </Heading>
       <TouchableHighlight onPress={onPress} underlayColor="transparent">
-        <Heading fontFamily="PoppinsRegular" size={14} color={Colors.primary}>
+        <Heading
+          fontFamily="PoppinsRegular"
+          size={14}
+          color={Colors.primary}
+          style={{ color: Colors.primary }}
+        >
           {subtitle}
         </Heading>
       </TouchableHighlight>
