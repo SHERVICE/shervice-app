@@ -9,7 +9,7 @@ const SearchIcon: React.FC<React.SVGProps<SVGElement>> = (props) => (
     viewBox="0 0 24 24"
   >
     <Path
-      stroke="#13171B"
+      stroke={props?.color ?? '#13171B'}
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth="1.5"

@@ -1,9 +1,7 @@
-import Button from '@/app/_components/Button';
 import Header from '@/app/_components/Header';
 import Heading from '@/app/_components/Heading';
 import Input from '@/app/_components/Input';
 import SafeAreaContainer from '@/app/_components/SafeAreaContainer';
-import Filter from '@/assets/icons/button/filter';
 import { Colors } from '@/constants/Colors';
 import { Categories, useCategories } from '@/store/useCategories';
 import { FlashList } from '@shopify/flash-list';
@@ -64,9 +62,6 @@ function CategoryScreen() {
               onChangeText={(e) => setSeach(e)}
             />
           </Flex>
-          <Flex narrow width={50}>
-            <Button iconLeft={<Filter />} />
-          </Flex>
         </Flex>
         <Flex mt={30}>
           <FlashList
@@ -75,6 +70,7 @@ function CategoryScreen() {
             renderItem={({ item }) => renderItem(item)}
             refreshing={false}
             onRefresh={refreshData}
+            showsVerticalScrollIndicator={false}
           />
         </Flex>
       </Flex>

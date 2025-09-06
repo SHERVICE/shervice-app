@@ -9,14 +9,19 @@ import Input from '../_components/Input';
 import SafeAreaContainer from '../_components/SafeAreaContainer';
 import LoginButtonSocial from './_components/login-button-social';
 
+import { useFindUserByEmail } from '@/store/users/useFindUserByEmail';
 import { storage } from '@/utils/storage';
+import { AxiosError } from 'axios';
 import { Controller, useForm } from 'react-hook-form';
 import { useMMKVString } from 'react-native-mmkv';
 import { z } from 'zod';
 import Header from '../_components/Header';
+import { Toast } from '../_components/Toast';
 
 const SignupSchemaFirstStep = z.object({
-  password: z.string({ error: 'Informe sua senha' }),
+  password: z
+    .string({ error: 'Informe sua senha' })
+    .min(6, { error: 'Senha deve ter no mínimo 6 caracteress' }),
   email: z.email({ error: 'Email inválido' }),
 });
 
@@ -25,26 +30,44 @@ type SignupValidationFirstStep = z.infer<typeof SignupSchemaFirstStep>;
 export default function Signup() {
   const [user] = useMMKVString('user');
 
-  const { email, password } = JSON.parse(user || '{}');
+  const { email } = JSON.parse(user || '{}');
 
   const router = useRouter();
 
-  const { control, handleSubmit } = useForm<SignupValidationFirstStep>({
-    mode: 'all',
-    resolver: zodResolver(SignupSchemaFirstStep),
-    defaultValues: {
-      password,
-      email,
-    },
-  });
+  const { control, handleSubmit, setError } =
+    useForm<SignupValidationFirstStep>({
+      mode: 'all',
+      resolver: zodResolver(SignupSchemaFirstStep),
+      defaultValues: {
+        email,
+      },
+    });
 
-  const onSubmit = handleSubmit((data) => {
-    const user = {
-      password: data.password,
-      email: data.email,
-    };
-    storage.set('user', JSON.stringify(user));
-    router.navigate('/(auth)/onboarding');
+  const { mutateAsync: findUserByEmail, isPending } = useFindUserByEmail();
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      const userExists = await findUserByEmail({ email: data.email });
+
+      if (userExists.exists) {
+        setError('email', { message: 'Email já cadastrado' });
+        return;
+      }
+
+      const user = {
+        password: data.password,
+        email: data.email,
+      };
+      storage.set('user', JSON.stringify(user));
+      router.navigate('/(auth)/onboarding');
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        const message = err?.response?.data?.error;
+        Toast.error(message);
+        return;
+      }
+      Toast.error('Aconteceu algo de errado');
+    }
   });
 
   return (
@@ -87,6 +110,7 @@ export default function Signup() {
                     variant="default"
                     placeholder="Seu email"
                     size="large"
+                    autoCorrect={false}
                     keyboardType="email-address"
                     onBlur={onBlur}
                     autoCapitalize="none"
@@ -105,17 +129,23 @@ export default function Signup() {
                 }) => (
                   <Input
                     keyboardType="default"
-                    placeholder="*****"
+                    placeholder="Sua senha"
                     secureTextEntry
                     variant="password"
                     onChangeText={onChange}
+                    autoCorrect={false}
+                    autoCapitalize="none"
                     onBlur={onBlur}
                     value={value}
                     error={errors.password?.message}
                   />
                 )}
               />
-              <Button title="Continuar" onPress={onSubmit} />
+              <Button
+                title="Continuar"
+                onPress={onSubmit}
+                isLoading={isPending}
+              />
             </Flex>
           </Flex>
           <Flex narrow fullWidth centered vCentered gap={10} m={[20, 0]}>

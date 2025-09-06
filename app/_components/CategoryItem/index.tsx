@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Colors } from '@/constants/Colors';
+import { useTheme } from '@react-navigation/native';
 import { useEffect } from 'react';
-import { StyleSheet, Text, TouchableHighlight, TouchableHighlightProps, View } from 'react-native';
+import { StyleSheet, TouchableHighlight, TouchableHighlightProps, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -9,6 +10,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { SvgUri } from 'react-native-svg';
+import Heading from '../Heading';
 
 interface CategoryItemProps extends TouchableHighlightProps {
   title: string;
@@ -21,6 +23,8 @@ const AnimatedTouchable = Animated.createAnimatedComponent(TouchableHighlight);
 function CategoryItem({ title, figure, index, ...rest }: CategoryItemProps) {
   const opacity = useSharedValue(0);
   const translateY = useSharedValue(20);
+
+  const {colors} = useTheme()
 
   useEffect(() => {
     opacity.value = withDelay(index * 100, withTiming(1, { duration: 400 }));
@@ -38,7 +42,7 @@ function CategoryItem({ title, figure, index, ...rest }: CategoryItemProps) {
         <View style={styles.categoryFigure}>
         <SvgUri uri={figure} width={50} height={50} />
       </View>
-      <Text style={styles.categoryTitle}>{title}</Text>
+      <Heading color={colors.text} size={12} fontFamily="PoppinsLight">{title}</Heading>
       </View>
     </AnimatedTouchable>
   );
@@ -61,9 +65,5 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.gray.gray05,
     borderRadius: 5,
   },
-  categoryTitle: {
-    fontSize: 12,
-    color: Colors.black,
-    fontFamily: 'PoppinsLight',
-  },
+  
 });

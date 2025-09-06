@@ -1,6 +1,7 @@
-import { Colors } from '@/constants/Colors';
+import { useTheme } from '@/context/theme-provider';
+import { BlurView } from 'expo-blur';
 import { Tabs, useSegments } from 'expo-router';
-import { Pressable } from 'react-native';
+import { Platform, Pressable, StyleSheet } from 'react-native';
 import BookingIcon from '../../assets/icons/tabs/booking';
 import CategoriesIcon from '../../assets/icons/tabs/categories';
 import HomeIcon from '../../assets/icons/tabs/home';
@@ -17,20 +18,35 @@ const tabs = [
 export default function TabLayout() {
   const segments = useSegments();
 
+  const { theme, isDark } = useTheme();
+  const { colors } = theme;
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.black,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.text,
         headerShown: false,
         tabBarStyle: {
           height: 98,
+          position: 'absolute',
           borderTopWidth: 0,
-          elevation: 0,
-          shadowOpacity: 0,
-          backgroundColor: '#fff',
         },
-        tabBarIconStyle: { marginTop: 12, marginBottom: 5 },
+        ...(Platform.OS === 'ios' && {
+          tabBarBackground: () => (
+            <BlurView
+              tint={isDark ? 'dark' : 'light'}
+              intensity={50}
+              style={{
+                ...StyleSheet.absoluteFillObject,
+              }}
+            />
+          ),
+        }),
+        tabBarIconStyle: {
+          marginTop: 6,
+          marginBottom: 5,
+        },
         tabBarLabelStyle: {
           fontSize: 11,
           fontFamily: 'PoppinsLight',

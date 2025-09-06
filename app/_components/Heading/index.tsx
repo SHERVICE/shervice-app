@@ -1,4 +1,5 @@
 import { Colors } from '@/constants/Colors';
+import { useTheme } from '@react-navigation/native';
 import { useMemo } from 'react';
 import { StyleSheet, Text, TextStyle } from 'react-native';
 
@@ -18,12 +19,21 @@ interface HeadingProps {
   size?: number;
   color?: string;
   children?: string[] | string;
+  style?: TextStyle;
+  numberOfLines?: number;
 }
 
-export default function Heading({ children, ...rest }: HeadingProps) {
-  const styles = useMemo(() => getStyles({ ...rest }), [rest]);
-
-  return <Text style={styles.text}>{children}</Text>;
+export default function Heading({ children, style, ...rest }: HeadingProps) {
+  const { colors } = useTheme();
+  const styles = useMemo(
+    () => getStyles({ ...rest, color: rest?.color ?? colors?.text }),
+    [rest, colors],
+  );
+  return (
+    <Text style={[styles.text, style]} numberOfLines={rest.numberOfLines}>
+      {children}
+    </Text>
+  );
 }
 
 const getStyles = (style: HeadingProps) =>
@@ -31,7 +41,7 @@ const getStyles = (style: HeadingProps) =>
     text: {
       fontFamily: style.fontFamily ?? 'PoppinsMedium',
       fontSize: style?.size ?? 16,
-      color: style.color ?? Colors.black,
+      color: style?.color ?? Colors?.black,
       textAlign: style.align ?? 'auto',
     },
   });
