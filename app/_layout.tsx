@@ -10,6 +10,7 @@ import { ToastProvider } from '@/context/toast';
 import { requestAndGetLocation } from '@/utils/locale';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { Host } from 'react-native-portalize';
 
 const queryClient = new QueryClient();
 
@@ -34,16 +35,18 @@ export default function RootLayout() {
     <ThemeProvider>
       <SafeAreaProvider>
         <QueryClientProvider client={queryClient}>
-          <ToastProvider>
-            <Stack>
-              <Stack.Screen
-                name="(tabs)"
-                options={{ headerShown: false, animation: 'none' }}
-              />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" />
-            </Stack>
-          </ToastProvider>
+          <Host>
+            <ToastProvider>
+              <Stack>
+                <Stack.Screen
+                  name="(tabs)"
+                  options={{ headerShown: false, animation: 'none' }}
+                />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </ToastProvider>
+          </Host>
         </QueryClientProvider>
       </SafeAreaProvider>
     </ThemeProvider>

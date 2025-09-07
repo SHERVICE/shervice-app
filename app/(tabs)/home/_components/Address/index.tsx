@@ -15,11 +15,13 @@ export default function AddressView() {
         {accessToken ? 'Meu endereço' : 'Bem-vindo'}
       </Heading>
       <Flex gap={5} pr={5}>
-        <Heading size={14} fontFamily="PoppinsLight">
-          {accessToken
-            ? `${account?.address.city} - ${account?.address.street}`
-            : 'Crie sua conta para começar'}
-        </Heading>
+        <Flex>
+          <Heading size={14} fontFamily="PoppinsLight" numberOfLines={1}>
+            {accessToken
+              ? `${account?.address.city} - ${account?.address.street}`
+              : 'Crie sua conta para começar'}
+          </Heading>
+        </Flex>
         <ArrowDown />
       </Flex>
     </Flex>

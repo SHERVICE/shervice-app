@@ -1,8 +1,8 @@
 import Button from '@/app/_components/Button';
 import Heading from '@/app/_components/Heading';
 import Input from '@/app/_components/Input';
-import { Toast } from '@/app/_components/Toast';
 import Successfully from '@/assets/icons/signup/successfully.svg';
+import { Colors } from '@/constants/Colors';
 import { useSignup } from '@/context/signup';
 import { useTheme } from '@/context/theme-provider';
 import { SigninType } from '@/schemas/signin';
@@ -27,18 +27,10 @@ import {
 import { Flex } from 'react-native-flex';
 
 import { useMMKVObject } from 'react-native-mmkv';
-import { Colors } from 'react-native/Libraries/NewAppScreen';
 
 const { width } = Dimensions.get('window');
 
-const FIELDS = [
-  'firstCode',
-  'secondCode',
-  'thirdCode',
-  'fourCode',
-  'fiveCode',
-  'sixCode',
-] as const;
+const FIELDS = ['firstCode', 'secondCode', 'thirdCode', 'fourCode'] as const;
 
 enum NumberCheck {
   ALERT = 'ALERT',
@@ -81,7 +73,7 @@ export default function ThirdStep() {
 
   const inputRefs = useRef<TextInput[]>([]);
 
-  const { control, watch, trigger } =
+  const { control, watch, trigger, setError, clearErrors, setValue } =
     useFormContext<SignupValidationCombinedStep>();
 
   const { currentStep } = useSignup();
@@ -90,8 +82,12 @@ export default function ThirdStep() {
     mutateAsync: enableAccountMutation,
     isPending,
     isSuccess,
+    error,
+    reset,
   } = useEnableAccount();
   const { mutateAsync: refreshCodeMutation } = useRefreshCode();
+
+  const axiosError = error as AxiosError<{ error: string }>;
 
   const code = watch('code');
   const [, setUser] = useMMKVObject<SigninType>('user');
@@ -118,10 +114,9 @@ export default function ThirdStep() {
       setUser(undefined);
     } catch (err) {
       if (err instanceof AxiosError) {
-        console.log(err.response?.data);
-        Toast.error(
-          err?.message || 'Aconteceu algo de errado, tente novamente!',
-        );
+        FIELDS.map((_, index) => {
+          setError(`code.${index}`, { type: 'validate', message: 'error' });
+        });
       }
     }
   };
@@ -131,12 +126,15 @@ export default function ThirdStep() {
       await refreshCodeMutation({ userId: account?.id ?? '' });
       setSecondsLeft(60);
       setTimerActive(true);
+      reset();
+      clearErrors('code');
+      FIELDS.map((_, index) => {
+        setValue(`code.${index}`, '');
+      });
+      inputRefs.current[0]?.focus();
     } catch (err) {
       if (err instanceof AxiosError) {
-        console.log(err.response?.data);
-        Toast.error(
-          err?.message || 'Aconteceu algo de errado, tente novamente!',
-        );
+        console.log(err);
       }
     }
   };
@@ -185,7 +183,11 @@ export default function ThirdStep() {
         onRequestClose={prev}
         presentationStyle="overFullScreen"
       >
-        <BlurView intensity={30} tint="dark" style={styles.absolute}>
+        <BlurView
+          intensity={30}
+          tint={isDark ? 'dark' : 'light'}
+          style={styles.absolute}
+        >
           <TouchableOpacity
             style={styles.absolute}
             activeOpacity={1}
@@ -233,7 +235,7 @@ export default function ThirdStep() {
                   Um código de verificação foi enviado para {phoneNumber}
                 </Heading>
                 <Flex narrow gap={10}>
-                  {FIELDS.map((item, index) => (
+                  {FIELDS.map((_, index) => (
                     <Flex width={50} key={index}>
                       <Controller
                         control={control}
@@ -264,6 +266,7 @@ export default function ThirdStep() {
                               }}
                               value={value}
                               error={fieldState.error?.message}
+                              showError={false}
                             />
                           );
                         }}
@@ -278,6 +281,11 @@ export default function ThirdStep() {
                       onPress={enableAccount}
                       disabled={isPending}
                     />
+                  </Flex>
+                  <Flex narrow fullWidth>
+                    <Heading size={11} color={Colors.red} align="left">
+                      {axiosError?.response?.data.error}
+                    </Heading>
                   </Flex>
                   <Flex narrow mt={10}>
                     <Heading size={14} fontFamily="PoppinsRegular">
@@ -326,6 +334,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
   modalText: {
     fontSize: 16,

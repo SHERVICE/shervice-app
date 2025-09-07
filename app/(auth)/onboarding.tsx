@@ -84,7 +84,7 @@ export default function OnBoarding() {
       const valid = await methods.trigger(stepField[currentStep]);
 
       if (valid) {
-        if (currentStep === 1 && !account) {
+        if (currentStep === 1) {
           try {
             await createUserInSecondStep();
           } catch (err: any) {

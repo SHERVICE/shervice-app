@@ -49,6 +49,7 @@ interface InputProps extends TextInputProps {
   size?: keyof typeof Dimensions;
   variant?: keyof typeof InputVariant;
   error?: string;
+  showError?: boolean;
   mask?: Mask;
 }
 
@@ -57,6 +58,7 @@ function Input(
     size = 'medium',
     variant = InputVariant.search,
     error,
+    showError = true,
     onBlur,
     mask,
     ...rest
@@ -119,7 +121,7 @@ function Input(
 
   return (
     <Animated.View style={[style.input, animatedBorderStyle]}>
-      {error && (
+      {error && showError && (
         <Animated.View
           style={[style.errorArea, { backgroundColor: colors.background }]}
           entering={FadeIn.duration(300)}
