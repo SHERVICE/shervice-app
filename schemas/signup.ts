@@ -40,7 +40,7 @@ const secondStepSignup = z.object({
 });
 
 const thirdStepSignup = z.object({
-  code: z.array(z.string()).length(6, 'Código deve ter 6 dígitos'),
+  code: z.array(z.string()).length(4, 'Código deve ter 6 dígitos'),
 });
 
 export const SignupConbinedSchema = firstStepSignup

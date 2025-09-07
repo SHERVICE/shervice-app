@@ -3,6 +3,7 @@ import { Check, CircleAlert } from 'lucide-react-native';
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { Flex } from 'react-native-flex';
+import { Portal } from 'react-native-portalize';
 import Animated, {
   Easing,
   runOnJS,
@@ -17,7 +18,6 @@ const TOAST_DURATION = 2000;
 
 type ToastType = 'success' | 'error' | 'alert';
 
-// API pública para chamar os toasts de fora
 let showToastExternal: ((message: string, type?: ToastType) => void) | null =
   null;
 
@@ -94,22 +94,24 @@ export default function ToastManager() {
   if (!message) return null;
 
   return (
-    <Animated.View
-      style={[
-        styles.toastContainer,
-        animatedStyle,
-        { backgroundColor: typeMessage[type].color },
-      ]}
-    >
-      <Flex vCentered centered gap={10}>
-        <Flex narrow>{typeMessage[type].icon}</Flex>
-        <Flex>
-          <Heading size={16} color={Colors.white}>
-            {message}
-          </Heading>
+    <Portal>
+      <Animated.View
+        style={[
+          styles.toastContainer,
+          animatedStyle,
+          { backgroundColor: typeMessage[type].color },
+        ]}
+      >
+        <Flex vCentered centered gap={10}>
+          <Flex narrow>{typeMessage[type].icon}</Flex>
+          <Flex>
+            <Heading size={16} color={Colors.white}>
+              {message}
+            </Heading>
+          </Flex>
         </Flex>
-      </Flex>
-    </Animated.View>
+      </Animated.View>
+    </Portal>
   );
 }
 
