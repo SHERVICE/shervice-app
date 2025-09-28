@@ -1,5 +1,4 @@
 import { Colors } from '@/constants/Colors';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useRouter } from 'expo-router';
 import { Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Flex } from 'react-native-flex';
@@ -10,55 +9,78 @@ import SafeAreaContainer from '../_components/SafeAreaContainer';
 import LoginButtonSocial from './_components/login-button-social';
 
 import { useFindUserByEmail } from '@/store/users/useFindUserByEmail';
-import { storage } from '@/utils/storage';
 import { AxiosError } from 'axios';
-import { Controller, useForm } from 'react-hook-form';
-import { useMMKVString } from 'react-native-mmkv';
-import { z } from 'zod';
+import { Controller, useFormContext } from 'react-hook-form';
 import Header from '../_components/Header';
 import { Toast } from '../_components/Toast';
 
-const SignupSchemaFirstStep = z.object({
-  password: z
-    .string({ error: 'Informe sua senha' })
-    .min(6, { error: 'Senha deve ter no mínimo 6 caracteress' }),
-  email: z.email({ error: 'Email inválido' }),
+import { GOOGLE_WEB_CLIENT, IOS_GOOGLE_CLIENT } from '@/const/vars';
+import { useSignup } from '@/context/signup';
+import {
+  ProviderSession,
+  SignupValidationCombinedStep,
+  stepFields,
+} from '@/schemas/signup';
+import {
+  GoogleSignin,
+  isSuccessResponse,
+} from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+  iosClientId: IOS_GOOGLE_CLIENT,
+  webClientId: GOOGLE_WEB_CLIENT,
 });
 
-type SignupValidationFirstStep = z.infer<typeof SignupSchemaFirstStep>;
-
 export default function Signup() {
-  const [user] = useMMKVString('user');
-
-  const { email } = JSON.parse(user || '{}');
-
   const router = useRouter();
 
-  const { control, handleSubmit, setError } =
-    useForm<SignupValidationFirstStep>({
-      mode: 'all',
-      resolver: zodResolver(SignupSchemaFirstStep),
-      defaultValues: {
-        email,
-      },
-    });
+  const { control, setError, reset, trigger, watch } =
+    useFormContext<SignupValidationCombinedStep>();
+
+  const { setCurrentStep } = useSignup();
+
+  const { email } = watch();
 
   const { mutateAsync: findUserByEmail, isPending } = useFindUserByEmail();
 
-  const onSubmit = handleSubmit(async (data) => {
+  const handleSignupGoogle = async () => {
     try {
-      const userExists = await findUserByEmail({ email: data.email });
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+
+      if (isSuccessResponse(response)) {
+        reset({
+          email: response.data.user.email,
+          name: response.data.user.name ?? '',
+          photo: response.data.user.photo,
+          accessToken: response.data.idToken,
+          provider: ProviderSession.GOOGLE,
+          isProvider: false,
+          hasCNPJ: false,
+          providerAccountId: response.data.user.id,
+        });
+        router.navigate('/(auth)/onboarding');
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const onSubmit = async () => {
+    try {
+      const valid = await trigger(stepFields[0]);
+
+      if (!valid) {
+        return;
+      }
+
+      const userExists = await findUserByEmail({ email });
 
       if (userExists.exists) {
         setError('email', { message: 'Email já cadastrado' });
         return;
       }
-
-      const user = {
-        password: data.password,
-        email: data.email,
-      };
-      storage.set('user', JSON.stringify(user));
+      setCurrentStep(1);
       router.navigate('/(auth)/onboarding');
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -68,7 +90,7 @@ export default function Signup() {
       }
       Toast.error('Aconteceu algo de errado');
     }
-  });
+  };
 
   return (
     <SafeAreaContainer>
@@ -166,12 +188,20 @@ export default function Signup() {
                   <LoginButtonSocial type="APPLE" title="Apple" />
                 </Flex>
                 <Flex>
-                  <LoginButtonSocial type="GOOGLE" title="Google" />
+                  <LoginButtonSocial
+                    type="GOOGLE"
+                    title="Google"
+                    onPress={handleSignupGoogle}
+                  />
                 </Flex>
               </>
             ) : (
               <>
-                <LoginButtonSocial type="GOOGLE" />
+                <LoginButtonSocial
+                  type="GOOGLE"
+                  title="Google"
+                  onPress={handleSignupGoogle}
+                />
               </>
             )}
           </Flex>

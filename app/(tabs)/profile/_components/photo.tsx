@@ -3,13 +3,19 @@ import { Camera } from 'lucide-react-native';
 import { Image, StyleSheet, TouchableHighlight, View } from 'react-native';
 import { Flex } from 'react-native-flex';
 
-function PhotoEdit() {
+interface PhotoProps {
+  profile: string | null;
+}
+
+function PhotoEdit({ profile }: PhotoProps) {
   return (
     <TouchableHighlight style={styles.photoArea} underlayColor="transparent">
       <Flex vertical>
         <Image
           source={{
-            uri: 'https://lh3.googleusercontent.com/a/ACg8ocIRAadRS4iSUsQCaDoNT22dnmZXdCzLZAumxpmZfhx0-JGIAJ_a=s576-c-no',
+            uri: profile
+              ? profile
+              : 'https://lh3.googleusercontent.com/a/ACg8ocIRAadRS4iSUsQCaDoNT22dnmZXdCzLZAumxpmZfhx0-JGIAJ_a=s576-c-no',
           }}
           style={styles.photo}
           resizeMode="cover"

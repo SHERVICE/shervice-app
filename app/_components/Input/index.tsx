@@ -12,9 +12,9 @@ import {
 } from 'react-native';
 
 /** Icons */
-import NotEye from '@/assets/icons/input/not-view.svg';
+import NotEye from '@/assets/icons/input/not-view';
 import SearchIcon from '@/assets/icons/input/search';
-import Eye from '@/assets/icons/input/view.svg';
+import Eye from '@/assets/icons/input/view';
 
 import { Dimensions } from '@/constants/Dimensions';
 import Animated, {
@@ -42,7 +42,7 @@ enum InputPadding {
   default = 20,
   otp = 15,
   search = 10,
-  password = 10,
+  password = 20,
 }
 
 interface InputProps extends TextInputProps {
@@ -142,15 +142,15 @@ function Input(
       )}
       {mask && (
         <MaskInput
-          style={[
-            style.field,
-            { color: isDark ? Colors.white : Colors.gray.gray80 },
-          ]}
+          style={[style.field, { color: isDark ? Colors.white : Colors.black }]}
           mask={mask}
           value={value}
           onFocus={handleFocus}
           onBlur={(e) => handleBlur(e)}
           onChangeText={onChangeTextMask}
+          placeholderTextColor={
+            isDark ? Colors.gray.gray80 : Colors.darkVariant.dark20
+          }
           onChange={onChange}
           {...rest}
           secureTextEntry={securityText}
@@ -158,12 +158,11 @@ function Input(
       )}
       {!mask && (
         <TextInput
-          style={[
-            style.field,
-            { color: isDark ? Colors.white : Colors.gray.gray80 },
-          ]}
+          style={[style.field, { color: isDark ? Colors.white : Colors.black }]}
           value={value}
-          placeholderTextColor={Colors.gray.gray80}
+          placeholderTextColor={
+            isDark ? Colors.gray.gray80 : Colors.darkVariant.dark20
+          }
           onFocus={handleFocus}
           onBlur={handleBlur}
           autoCapitalize="none"
@@ -181,8 +180,18 @@ function Input(
           underlayColor="transparent"
         >
           <View>
-            {securityText && <NotEye height={Dimensions[size] * 0.42} />}
-            {!securityText && <Eye height={Dimensions[size] * 0.42} />}
+            {securityText && (
+              <NotEye
+                height={Dimensions[size] * 0.42}
+                color={isDark ? Colors.white : undefined}
+              />
+            )}
+            {!securityText && (
+              <Eye
+                height={Dimensions[size] * 0.42}
+                color={isDark ? Colors.white : undefined}
+              />
+            )}
           </View>
         </TouchableHighlight>
       )}

@@ -14,7 +14,8 @@
       "bundleIdentifier": "com.shermon.shervice",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      }
+      },
+      "appleTeamId": "SL9ZW4D7ZC"
     },
     "android": {
       "adaptiveIcon": {

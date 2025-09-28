@@ -2,6 +2,7 @@ import { useTheme } from '@/context/theme-provider';
 import { BlurView } from 'expo-blur';
 import { Tabs, useSegments } from 'expo-router';
 import { Platform, Pressable, StyleSheet } from 'react-native';
+import * as Haptics from 'react-native-haptic-feedback';
 import BookingIcon from '../../assets/icons/tabs/booking';
 import CategoriesIcon from '../../assets/icons/tabs/categories';
 import HomeIcon from '../../assets/icons/tabs/home';
@@ -15,8 +16,17 @@ const tabs = [
   { name: 'profile', title: 'Perfil', icon: ProfileIcon },
 ];
 
+const hapticOptions = {
+  enableVibrateFallback: true,
+  ignoreAndroidSystemSettings: false,
+};
+
 export default function TabLayout() {
   const segments = useSegments();
+
+  function playHaptic() {
+    Haptics.trigger('selection', hapticOptions); // leve e igual ao iOS tabs
+  }
 
   const { theme, isDark } = useTheme();
   const { colors } = theme;
@@ -56,7 +66,10 @@ export default function TabLayout() {
             <Pressable
               android_ripple={null}
               style={props.style}
-              onPress={props.onPress}
+              onPress={(e) => {
+                playHaptic();
+                props.onPress?.(e);
+              }}
               onLongPress={props.onLongPress}
               accessibilityRole={props.accessibilityRole}
               accessibilityState={props.accessibilityState}

@@ -1,17 +1,16 @@
 import { useSignup } from '@/context/signup';
-import { SigninType } from '@/schemas/signin';
+import { usePhoneNumberCheck } from '@/store/phone/useCheckNumber';
 import { UserResponse, useSignupMutation } from '@/store/users/useSignup';
 import { cleanNumber } from '@/utils/cleanNumber';
 import { ErrorsEnum } from '@/utils/errors';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
 import { useNavigation } from 'expo-router';
-import { FormProvider, useForm } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { FlatList } from 'react-native';
 import { Flex } from 'react-native-flex';
 import { useMMKVObject } from 'react-native-mmkv';
 import {
-  SignupConbinedSchema,
+  SignupValidationCombinedStep,
   stepFields,
   stepFieldsWithCPFCNPJ,
 } from '../../schemas/signup';
@@ -33,28 +32,17 @@ export default function OnBoarding() {
   const { currentStep, setCurrentStep, flashListRef } = useSignup();
 
   const { mutateAsync: signupMutationAsyn, isPending } = useSignupMutation();
-
+  const { mutateAsync: mutateCheckNumber } = usePhoneNumberCheck();
   const navigate = useNavigation();
 
-  const [user] = useMMKVObject<SigninType>('user');
-  const [account, setAccount] = useMMKVObject<UserResponse>('account');
+  const [, setAccount] = useMMKVObject<UserResponse>('account');
 
-  const methods = useForm({
-    mode: 'onChange',
-    resolver: zodResolver(SignupConbinedSchema),
-    defaultValues: {
-      isProvider: false,
-      hasCNPJ: false,
-      email: user?.email,
-      password: user?.password,
-      code: ['', '', '', '', '', ''],
-    },
-  });
+  const { watch, trigger, setError } =
+    useFormContext<SignupValidationCombinedStep>();
 
-  const values = methods.watch();
+  const values = watch();
 
   const createUserInSecondStep = async () => {
-    const values = methods.getValues();
     const data = await signupMutationAsyn({
       name: values.name,
       cpfCnpj: cleanNumber(values.cpfCnpj),
@@ -67,6 +55,10 @@ export default function OnBoarding() {
       password: values.password,
       phone: cleanNumber(values.phone),
       serviceProvider: values.isProvider ?? false,
+      photo: values.photo,
+      accessToken: values.accessToken,
+      provider: values.provider,
+      providerAccountId: values.providerAccountId,
     });
 
     setAccount(data);
@@ -81,9 +73,13 @@ export default function OnBoarding() {
           ? stepFieldsWithCPFCNPJ
           : stepFields;
 
-      const valid = await methods.trigger(stepField[currentStep]);
+      const isValid = await trigger(stepField[currentStep]);
 
-      if (valid) {
+      if (!isValid) {
+        return;
+      }
+
+      if (isValid) {
         if (currentStep === 1) {
           try {
             await createUserInSecondStep();
@@ -91,8 +87,9 @@ export default function OnBoarding() {
             const code = err?.response?.data.code;
             const error = err?.response?.data.error;
             if (err instanceof AxiosError) {
+              console.log(err.response?.data, 'sds');
               if (code === ErrorsEnum.PHONE_ALREADY_EXISTS) {
-                methods.setError('phone', {
+                setError('phone', {
                   message: 'Esse número já está em uso',
                 });
                 return;
@@ -102,6 +99,19 @@ export default function OnBoarding() {
             return;
           }
         }
+        if (currentStep === 0) {
+          const numberCheck = await mutateCheckNumber({
+            phone: cleanNumber(values.phone),
+          });
+
+          if (numberCheck.exists) {
+            setError('phone', {
+              message: 'Esse número já está em uso',
+            });
+            return;
+          }
+        }
+
         setCurrentStep(newIndex);
         flashListRef.current?.scrollToIndex({
           index: newIndex,
@@ -129,20 +139,18 @@ export default function OnBoarding() {
         <Flex narrow gap={10} p={[0, 20]} mt={30}>
           <SlidingBackground count={steps.length} index={currentStep} />
         </Flex>
-        <FormProvider {...methods}>
-          <Flex p={[0, 20]} mt={30}>
-            <FlatList
-              ref={flashListRef}
-              data={steps}
-              keyExtractor={(item) => item.key}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              scrollEnabled={false}
-              renderItem={({ item }) => <item.component />}
-            />
-          </Flex>
-        </FormProvider>
+        <Flex p={[0, 20]} mt={30}>
+          <FlatList
+            ref={flashListRef}
+            data={steps}
+            keyExtractor={(item) => item.key}
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            scrollEnabled={false}
+            renderItem={({ item }) => <item.component />}
+          />
+        </Flex>
 
         {currentStep < 2 && (
           <Flex fullWidth p={[40, 20]} gap={10} vEnd narrow>
