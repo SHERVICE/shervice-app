@@ -1,3 +1,4 @@
+import { ProviderSession } from '@/schemas/signup';
 import api from '@/services/api';
 import { useMutation } from '@tanstack/react-query';
 
@@ -10,11 +11,15 @@ interface Address {
   longitude?: number;
 }
 
-interface User {
+export interface User {
   name: string;
   email: string;
-  password: string;
+  password?: string;
   phone: string;
+  photo?: string | null;
+  accessToken?: string | null;
+  provider?: ProviderSession;
+  providerAccountId: string | null;
   serviceProvider: boolean;
   cpfCnpj: string;
   address: Address;
@@ -25,6 +30,7 @@ export interface UserResponse {
   name: string;
   email: string;
   phone: string;
+  photo: string | null;
   address: Address;
 }
 

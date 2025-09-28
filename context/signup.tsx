@@ -1,3 +1,5 @@
+import { SignupConbinedSchema } from '@/schemas/signup';
+import { zodResolver } from '@hookform/resolvers/zod';
 import React, {
   createContext,
   ReactNode,
@@ -6,6 +8,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 import { FlatList } from 'react-native';
 
 type Coordinates = {
@@ -65,12 +68,23 @@ export function SignupProvider({ children }: SignupProviderProps) {
     ],
   );
 
+  const methods = useForm({
+    mode: 'onChange',
+    resolver: zodResolver(SignupConbinedSchema),
+    defaultValues: {
+      isProvider: false,
+      hasCNPJ: false,
+      code: ['', '', '', ''],
+    },
+  });
+
   return (
-    <SignupContext.Provider value={value}>{children}</SignupContext.Provider>
+    <SignupContext.Provider value={value}>
+      <FormProvider {...methods}>{children}</FormProvider>
+    </SignupContext.Provider>
   );
 }
 
-// Hook pra usar mais fácil
 export function useSignup() {
   return useContext(SignupContext);
 }

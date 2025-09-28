@@ -17,6 +17,9 @@ export const Colors = {
   gray500: '#A1A4A7',
   light500: '#D9E1E1',
   white: '#FFFFFF',
+  darkVariant: {
+    dark20: '#00000033',
+  },
   gray: {
     gray05: '#A1A4A70D',
     gray10: '#A1A4A71A',

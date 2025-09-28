@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { StyleSheet, TouchableWithoutFeedback } from 'react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -15,13 +16,18 @@ interface SwitchProps {
   height?: number;
 }
 
+const hapticOptions = {
+  enableVibrateFallback: true,
+  ignoreAndroidSystemSettings: false,
+};
+
 const Switch: React.FC<SwitchProps> = ({
   value,
   onValueChange,
   trackColor = { false: '#E5E5EA', true: '#34C759' },
   thumbColor = '#fff',
-  width = 40,
-  height = 24,
+  width = 51,
+  height = 31,
 }) => {
   const thumbSize = height - 4;
   const margin = 2;
@@ -37,8 +43,13 @@ const Switch: React.FC<SwitchProps> = ({
     transform: [{ translateX: translateX.value }],
   }));
 
+  const handlePress = () => {
+    onValueChange(!value);
+    ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
+  };
+
   return (
-    <TouchableWithoutFeedback onPress={() => onValueChange(!value)}>
+    <TouchableWithoutFeedback onPress={handlePress}>
       <Animated.View
         style={[
           styles.track,
