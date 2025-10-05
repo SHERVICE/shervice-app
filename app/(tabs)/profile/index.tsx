@@ -6,7 +6,7 @@ import LogoutIcon from '@/assets/icons/profile/logout';
 import TermsIcon from '@/assets/icons/profile/terms';
 import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/theme-provider';
-import { UserResponse } from '@/store/users/useSignup';
+import { UserResponse } from '@/store/session/useSignup';
 import { useAuthTokens } from '@/utils/getToken';
 import { useRouter } from 'expo-router';
 import {

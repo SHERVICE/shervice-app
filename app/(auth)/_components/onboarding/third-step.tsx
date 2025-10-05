@@ -7,9 +7,10 @@ import { useSignup } from '@/context/signup';
 import { useTheme } from '@/context/theme-provider';
 import { SigninType } from '@/schemas/signin';
 import { SignupValidationCombinedStep } from '@/schemas/signup';
+import { UserResponse } from '@/store/session/useSignup';
 import { useEnableAccount } from '@/store/users/useEnableAccount';
 import { useRefreshCode } from '@/store/users/useRefreshCode';
-import { UserResponse } from '@/store/users/useSignup';
+import { maskPhoneCustom } from '@/utils/maskPhone';
 import { AxiosError } from 'axios';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
@@ -151,6 +152,9 @@ export default function ThirdStep() {
     if (currentStep !== 2 && stepPhoneNumber !== 'ALERT') {
       setStepPhoneNumber(NumberCheck.ALERT);
     }
+    if (currentStep === 2 && stepPhoneNumber === NumberCheck.ENABLE) {
+      setTimerActive(true);
+    }
   }, [currentStep, stepPhoneNumber]);
 
   useEffect(() => {
@@ -169,10 +173,6 @@ export default function ThirdStep() {
 
     return () => clearInterval(interval);
   }, [timerActive]);
-
-  useEffect(() => {
-    setTimerActive(true);
-  }, []);
 
   return (
     <View style={styles.container}>
@@ -207,10 +207,10 @@ export default function ThirdStep() {
             {!isSuccess && stepPhoneNumber === NumberCheck.ALERT && (
               <>
                 <Heading fontFamily="PoppinsLight" size={16}>
-                  Verifique seu endereço de e-mail
+                  Verifique seu número de telefone
                 </Heading>
                 <Heading fontFamily="PoppinsBold" size={20}>
-                  {phoneNumber}
+                  {phoneNumber && maskPhoneCustom(phoneNumber)}
                 </Heading>
                 <Heading fontFamily="PoppinsRegular" size={14} align="center">
                   Enviaremos o código de autenticação para o número de celular
@@ -232,7 +232,8 @@ export default function ThirdStep() {
                   Informe o código
                 </Heading>
                 <Heading fontFamily="PoppinsRegular" size={14} align="center">
-                  Um código de verificação foi enviado para {phoneNumber}
+                  Um código de verificação foi enviado para{' '}
+                  {phoneNumber && maskPhoneCustom(phoneNumber)}
                 </Heading>
                 <Flex narrow gap={10}>
                   {FIELDS.map((_, index) => (

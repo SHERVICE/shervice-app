@@ -25,7 +25,7 @@ export default function TabLayout() {
   const segments = useSegments();
 
   function playHaptic() {
-    Haptics.trigger('selection', hapticOptions); // leve e igual ao iOS tabs
+    Haptics.trigger('selection', hapticOptions);
   }
 
   const { theme, isDark } = useTheme();

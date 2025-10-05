@@ -16,15 +16,14 @@ import { Toast } from '../_components/Toast';
 
 import { GOOGLE_WEB_CLIENT, IOS_GOOGLE_CLIENT } from '@/const/vars';
 import { useSignup } from '@/context/signup';
-import {
-  ProviderSession,
-  SignupValidationCombinedStep,
-  stepFields,
-} from '@/schemas/signup';
+import { ProviderSession } from '@/schemas/signin';
+import { SignupValidationCombinedStep, stepFields } from '@/schemas/signup';
+import { UserResponse, useSigninMutation } from '@/store/session/useSignin';
 import {
   GoogleSignin,
   isSuccessResponse,
 } from '@react-native-google-signin/google-signin';
+import { useMMKVObject } from 'react-native-mmkv';
 
 GoogleSignin.configure({
   iosClientId: IOS_GOOGLE_CLIENT,
@@ -37,23 +36,50 @@ export default function Signup() {
   const { control, setError, reset, trigger, watch } =
     useFormContext<SignupValidationCombinedStep>();
 
+  const [, setAccount] = useMMKVObject<UserResponse>('account');
+
   const { setCurrentStep } = useSignup();
 
   const { email } = watch();
 
   const { mutateAsync: findUserByEmail, isPending } = useFindUserByEmail();
+  const { mutateAsync: signinMutation, isPending: isPendingSignin } =
+    useSigninMutation();
 
   const handleSignupGoogle = async () => {
     try {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
+      console.log(response.data?.user.email, 'magazine');
+      const userExists = await findUserByEmail({
+        email: response.data?.user.email ?? '',
+      });
+      console.log('adasdasdasdasdasd =======>', response.data?.user.email);
+      /**
+       * Verifica se o usuario existe e se a conta dele está relacionado com alguma rede social
+       * Caso esteja já faz login diretamente
+       */
+      console.log(response);
+      if (userExists.exists && userExists.isSocial) {
+        const account = await signinMutation({
+          email: response?.data?.user.email ?? '',
+          token: response?.data?.idToken ?? '',
+          provider: ProviderSession.GOOGLE,
+          password: null,
+        });
+        setAccount(account);
+        router.dismissAll();
+        router.push('/(tabs)/profile');
+        console.log('HOHOHOHOHO');
+        return;
+      }
 
       if (isSuccessResponse(response)) {
         reset({
           email: response.data.user.email,
           name: response.data.user.name ?? '',
           photo: response.data.user.photo,
-          accessToken: response.data.idToken,
+          token: response.data.idToken,
           provider: ProviderSession.GOOGLE,
           isProvider: false,
           hasCNPJ: false,
@@ -62,7 +88,10 @@ export default function Signup() {
         router.navigate('/(auth)/onboarding');
       }
     } catch (err) {
-      console.log(err);
+      if (err instanceof AxiosError) {
+        console.log(err.config?.baseURL);
+        Toast.error(err.response?.data?.error || 'Aconteceu algo de errado');
+      }
     }
   };
 
@@ -80,7 +109,7 @@ export default function Signup() {
         setError('email', { message: 'Email já cadastrado' });
         return;
       }
-      setCurrentStep(1);
+      setCurrentStep(0);
       router.navigate('/(auth)/onboarding');
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -158,7 +187,7 @@ export default function Signup() {
                     autoCorrect={false}
                     autoCapitalize="none"
                     onBlur={onBlur}
-                    value={value}
+                    value={value ? value : undefined}
                     error={errors.password?.message}
                   />
                 )}
