@@ -50,16 +50,13 @@ export default function Signup() {
     try {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
-      console.log(response.data?.user.email, 'magazine');
       const userExists = await findUserByEmail({
         email: response.data?.user.email ?? '',
       });
-      console.log('adasdasdasdasdasd =======>', response.data?.user.email);
       /**
        * Verifica se o usuario existe e se a conta dele está relacionado com alguma rede social
        * Caso esteja já faz login diretamente
        */
-      console.log(response);
       if (userExists.exists && userExists.isSocial) {
         const account = await signinMutation({
           email: response?.data?.user.email ?? '',
@@ -70,7 +67,6 @@ export default function Signup() {
         setAccount(account);
         router.dismissAll();
         router.push('/(tabs)/profile');
-        console.log('HOHOHOHOHO');
         return;
       }
 
@@ -89,7 +85,6 @@ export default function Signup() {
       }
     } catch (err) {
       if (err instanceof AxiosError) {
-        console.log(err.config?.baseURL);
         Toast.error(err.response?.data?.error || 'Aconteceu algo de errado');
       }
     }

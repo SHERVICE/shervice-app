@@ -130,7 +130,6 @@ export default function OnBoarding() {
 
     if (currentStep > 0) {
       const newIndex = currentStep;
-      console.log(newIndex);
       setCurrentStep(newIndex - 1);
       flashListRef.current?.scrollToIndex({
         index: newIndex - 1,
