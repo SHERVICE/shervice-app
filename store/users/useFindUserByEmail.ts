@@ -8,6 +8,7 @@ interface FindUserByEmail {
 interface FindUserByEmailResponse {
   exists: boolean;
   phoneVerification: boolean;
+  isSocial: boolean;
 }
 
 export function useFindUserByEmail() {

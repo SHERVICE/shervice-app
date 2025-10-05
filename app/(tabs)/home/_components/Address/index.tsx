@@ -1,6 +1,6 @@
 import Heading from '@/app/_components/Heading';
 import ArrowDown from '@/assets/icons/home/arrow-down.svg';
-import { UserResponse } from '@/store/users/useSignup';
+import { UserResponse } from '@/store/session/useSignup';
 import { useAuthTokens } from '@/utils/getToken';
 import { Flex } from 'react-native-flex';
 import { useMMKVObject } from 'react-native-mmkv';

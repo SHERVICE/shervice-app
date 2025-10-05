@@ -14,10 +14,10 @@ interface Address {
 export interface User {
   name: string;
   email: string;
-  password?: string;
+  password: string | null;
   phone: string;
   photo?: string | null;
-  accessToken?: string | null;
+  token?: string | null;
   provider?: ProviderSession;
   providerAccountId: string | null;
   serviceProvider: boolean;

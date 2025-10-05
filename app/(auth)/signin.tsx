@@ -1,16 +1,80 @@
 import { Colors } from '@/constants/Colors';
-import { MASK_PHONE } from '@/constants/Mask';
-import { Link } from 'expo-router';
+import { ProviderSession, SigninSchema, SigninType } from '@/schemas/signin';
+import { UserResponse, useSigninMutation } from '@/store/session/useSignin';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { AxiosError } from 'axios';
+import { Link, useRouter } from 'expo-router';
+import { Controller, useForm } from 'react-hook-form';
 import { Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Flex } from 'react-native-flex';
+import { useMMKVObject } from 'react-native-mmkv';
 import Button from '../_components/Button';
 import Header from '../_components/Header';
 import Heading from '../_components/Heading';
 import Input from '../_components/Input';
 import SafeAreaContainer from '../_components/SafeAreaContainer';
+import { Toast } from '../_components/Toast';
 import LoginButtonSocial from './_components/login-button-social';
 
+import { GOOGLE_WEB_CLIENT, IOS_GOOGLE_CLIENT } from '@/const/vars';
+import {
+  GoogleSignin,
+  isSuccessResponse,
+} from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+  iosClientId: IOS_GOOGLE_CLIENT,
+  webClientId: GOOGLE_WEB_CLIENT,
+});
+
 export default function Signin() {
+  const router = useRouter();
+
+  const { mutateAsync: signinMutation, isPending: isPendingSignin } =
+    useSigninMutation();
+
+  const [, setAccount] = useMMKVObject<UserResponse>('account');
+
+  const form = useForm<SigninType>({
+    resolver: zodResolver(SigninSchema),
+  });
+
+  const onSubmit = async (data: SigninType) => {
+    try {
+      const account = await signinMutation(data);
+      setAccount(account);
+      router.replace('/(tabs)/profile');
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        Toast.error(err.response?.data?.error || 'Aconteceu algo de errado');
+      }
+      Toast.error('Erro');
+    }
+  };
+
+  const handleSigninGoogle = async () => {
+    try {
+      await GoogleSignin.hasPlayServices();
+      const response = await GoogleSignin.signIn();
+
+      if (isSuccessResponse(response)) {
+        const account = await signinMutation({
+          email: response.data.user.email,
+          token: response.data.idToken,
+          provider: ProviderSession.GOOGLE,
+          password: null,
+        });
+        setAccount(account);
+        router.dismissAll();
+        router.push('/(tabs)/profile');
+      }
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        Toast.error(err.response?.data?.error || 'Aconteceu algo de errado');
+      }
+    }
+  };
+
   return (
     <SafeAreaContainer>
       <Flex p={[0, 20]} narrow>
@@ -43,7 +107,11 @@ export default function Signin() {
               {Platform.OS === 'ios' ? (
                 <>
                   <LoginButtonSocial type="APPLE" title="Entrar com Apple" />
-                  <LoginButtonSocial type="GOOGLE" title="Entrar com Google" />
+                  <LoginButtonSocial
+                    type="GOOGLE"
+                    title="Entrar com Google"
+                    onPress={handleSigninGoogle}
+                  />
                 </>
               ) : (
                 <>
@@ -63,25 +131,58 @@ export default function Signin() {
               <View className="flex-1 h-[1px]" style={styles.divider} />
             </Flex>
             <Flex vertical gap={16} fullWidth>
-              <Input
-                variant="default"
-                placeholder="Informe seu número de celular"
-                keyboardType="number-pad"
-                size="large"
-                mask={MASK_PHONE}
+              <Controller
+                control={form.control}
+                name="email"
+                render={({
+                  field: { onBlur, onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <Input
+                    variant="default"
+                    placeholder="Seu email"
+                    size="large"
+                    autoCorrect={false}
+                    keyboardType="email-address"
+                    onBlur={onBlur}
+                    autoCapitalize="none"
+                    onChangeText={onChange}
+                    value={value}
+                    error={error?.message}
+                  />
+                )}
               />
-              <Input
-                variant="password"
-                placeholder="Senha"
-                secureTextEntry
-                size="large"
+              <Controller
+                control={form.control}
+                name="password"
+                render={({
+                  field: { onBlur, onChange, value },
+                  formState: { errors },
+                }) => (
+                  <Input
+                    keyboardType="default"
+                    placeholder="Sua senha"
+                    secureTextEntry
+                    variant="password"
+                    onChangeText={onChange}
+                    autoCorrect={false}
+                    autoCapitalize="none"
+                    onBlur={onBlur}
+                    value={value ? value : undefined}
+                    error={errors.password?.message}
+                  />
+                )}
               />
               <Flex narrow end fullWidth>
                 <Link href="/(auth)/signup" style={styles.link} push>
                   Esqueceu a senha?
                 </Link>
               </Flex>
-              <Button title="Entrar" />
+              <Button
+                title="Entrar"
+                onPress={form.handleSubmit(onSubmit)}
+                isLoading={isPendingSignin}
+              />
               <Flex narrow centered fullWidth gap={5}>
                 <Heading size={14} fontFamily="PoppinsRegular">
                   Não possui conta?

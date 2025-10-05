@@ -1,32 +1,8 @@
 import { cnpj, cpf } from 'cpf-cnpj-validator';
 import { z } from 'zod';
+import { SigninSchema } from './signin';
 
-export enum ProviderSession {
-  GOOGLE = 'GOOGLE',
-  FACEBOOK = 'FACEBOOK',
-  IOS = 'IOS',
-}
-
-export const firstStepSignup = z
-  .object({
-    email: z.email({ error: 'Email inválido' }),
-    password: z
-      .string({ error: 'Senha obrigatória' })
-      .min(6, { error: 'Senha deve ter no minímo 6 caractes' })
-      .optional(),
-    provider: z.nativeEnum(ProviderSession).optional(),
-  })
-  .superRefine((data, ctx) => {
-    if (!data.provider && !data.password) {
-      ctx.addIssue({
-        path: ['password'],
-        message: 'Senha obrigatória',
-        code: z.ZodIssueCode.custom,
-      });
-    }
-  });
-
-const secondStepSignup = z.object({
+const DetailsUserInfoSchema = z.object({
   name: z.string({ error: 'Nome Obrigatório' }),
   phone: z.string({ error: 'Telefone obrigatório' }).refine(
     (val) => {
@@ -51,11 +27,10 @@ const secondStepSignup = z.object({
     ),
   hasCNPJ: z.boolean().optional().default(false),
   photo: z.string().url().nullish(),
-  accessToken: z.string().nullish(),
   providerAccountId: z.string().nullable(),
 });
 
-const thirdStepSignup = z.object({
+const AddressSchema = z.object({
   city: z.string().min(2, 'Cidade inválida'),
   state: z.string().min(2, 'Estado deve ter 2 letras'),
   street: z.string().optional(),
@@ -63,14 +38,13 @@ const thirdStepSignup = z.object({
   number: z.string().optional(),
 });
 
-const fourStepSignup = z.object({
+const PhoneSchema = z.object({
   code: z.array(z.string()).length(4, 'Código deve ter 6 dígitos'),
 });
 
-export const SignupConbinedSchema = firstStepSignup
-  .merge(secondStepSignup)
-  .merge(thirdStepSignup)
-  .merge(fourStepSignup);
+export const SignupConbinedSchema = SigninSchema.merge(DetailsUserInfoSchema)
+  .merge(AddressSchema)
+  .merge(PhoneSchema);
 
 export type SignupValidationCombinedStep = z.infer<typeof SignupConbinedSchema>;
 

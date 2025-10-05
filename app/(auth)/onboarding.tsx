@@ -1,6 +1,6 @@
 import { useSignup } from '@/context/signup';
 import { usePhoneNumberCheck } from '@/store/phone/useCheckNumber';
-import { UserResponse, useSignupMutation } from '@/store/users/useSignup';
+import { UserResponse, useSignupMutation } from '@/store/session/useSignup';
 import { cleanNumber } from '@/utils/cleanNumber';
 import { ErrorsEnum } from '@/utils/errors';
 import { AxiosError } from 'axios';
@@ -56,7 +56,7 @@ export default function OnBoarding() {
       phone: cleanNumber(values.phone),
       serviceProvider: values.isProvider ?? false,
       photo: values.photo,
-      accessToken: values.accessToken,
+      token: values.token,
       provider: values.provider,
       providerAccountId: values.providerAccountId,
     });
@@ -67,13 +67,16 @@ export default function OnBoarding() {
   const next = async () => {
     if (currentStep < steps.length - 1) {
       const newIndex = currentStep + 1;
+      const ignoredFirstFieldValidation = 1;
 
       const stepField =
         values.isProvider && currentStep === 0
           ? stepFieldsWithCPFCNPJ
           : stepFields;
 
-      const isValid = await trigger(stepField[currentStep]);
+      const isValid = await trigger(
+        stepField[currentStep + ignoredFirstFieldValidation],
+      );
 
       if (!isValid) {
         return;
@@ -87,7 +90,6 @@ export default function OnBoarding() {
             const code = err?.response?.data.code;
             const error = err?.response?.data.error;
             if (err instanceof AxiosError) {
-              console.log(err.response?.data, 'sds');
               if (code === ErrorsEnum.PHONE_ALREADY_EXISTS) {
                 setError('phone', {
                   message: 'Esse número já está em uso',
@@ -95,15 +97,15 @@ export default function OnBoarding() {
                 return;
               }
             }
+
             Toast.error(error || 'Aconteceu algo de errado, tente novamente!');
             return;
           }
         }
-        if (currentStep === 0) {
+        if (currentStep === 0 && !values.provider) {
           const numberCheck = await mutateCheckNumber({
             phone: cleanNumber(values.phone),
           });
-
           if (numberCheck.exists) {
             setError('phone', {
               message: 'Esse número já está em uso',
@@ -127,9 +129,12 @@ export default function OnBoarding() {
     }
 
     if (currentStep > 0) {
-      const newIndex = currentStep - 1;
-      setCurrentStep(newIndex);
-      flashListRef.current?.scrollToIndex({ index: newIndex, animated: true });
+      const newIndex = currentStep;
+      setCurrentStep(newIndex - 1);
+      flashListRef.current?.scrollToIndex({
+        index: newIndex - 1,
+        animated: true,
+      });
     }
   };
 
