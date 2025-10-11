@@ -1,5 +1,6 @@
 import { Colors } from '@/constants/Colors';
-import { Camera } from 'lucide-react-native';
+import { useTheme } from '@/context/theme-provider';
+import { Camera, User } from 'lucide-react-native';
 import { Image, StyleSheet, TouchableHighlight, View } from 'react-native';
 import { Flex } from 'react-native-flex';
 
@@ -8,18 +9,24 @@ interface PhotoProps {
 }
 
 function PhotoEdit({ profile }: PhotoProps) {
+  const { isDark } = useTheme();
   return (
     <TouchableHighlight style={styles.photoArea} underlayColor="transparent">
-      <Flex vertical>
-        <Image
-          source={{
-            uri: profile
-              ? profile
-              : 'https://lh3.googleusercontent.com/a/ACg8ocIRAadRS4iSUsQCaDoNT22dnmZXdCzLZAumxpmZfhx0-JGIAJ_a=s576-c-no',
-          }}
-          style={styles.photo}
-          resizeMode="cover"
-        />
+      <Flex vertical centered vCentered>
+        {profile && (
+          <Image
+            source={{
+              uri: profile,
+            }}
+            style={styles.photo}
+            resizeMode="cover"
+          />
+        )}
+
+        {!profile && (
+          <User size={40} color={isDark ? Colors.white : Colors.black} />
+        )}
+
         <View style={styles.photoIcon}>
           <Camera size={18} color={Colors.white} />
         </View>
@@ -36,7 +43,8 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 10,
     position: 'relative',
-    backgroundColor: 'yellow',
+    backgroundColor: Colors.gray.gray10,
+    overflow: 'hidden',
   },
   photoIcon: {
     width: 34,

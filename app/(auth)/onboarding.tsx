@@ -18,14 +18,12 @@ import Button from '../_components/Button';
 import SafeAreaContainer from '../_components/SafeAreaContainer';
 import { Toast } from '../_components/Toast';
 import FirstStep from './_components/onboarding/first-step';
-import SecondStep from './_components/onboarding/second-step';
 import ThirdStep from './_components/onboarding/third-step';
 import SlidingBackground from './_components/view-step';
 
 const steps = [
   { key: 'step1', title: 'Seus dados', component: FirstStep },
-  { key: 'step2', title: 'Endereço', component: SecondStep },
-  { key: 'step3', title: 'Confirmação', component: ThirdStep },
+  { key: 'step2', title: 'Confirmação', component: ThirdStep },
 ];
 
 export default function OnBoarding() {
@@ -47,11 +45,6 @@ export default function OnBoarding() {
       name: values.name,
       cpfCnpj: cleanNumber(values.cpfCnpj),
       email: values.email,
-      address: {
-        city: values.city,
-        street: values.street ?? '',
-        zipcode: cleanNumber(values.zipcode ?? ''),
-      },
       password: values.password,
       phone: cleanNumber(values.phone),
       serviceProvider: values.isProvider ?? false,
@@ -83,7 +76,7 @@ export default function OnBoarding() {
       }
 
       if (isValid) {
-        if (currentStep === 1) {
+        if (currentStep === 0) {
           try {
             await createUserInSecondStep();
           } catch (err: any) {
@@ -99,17 +92,6 @@ export default function OnBoarding() {
             }
 
             Toast.error(error || 'Aconteceu algo de errado, tente novamente!');
-            return;
-          }
-        }
-        if (currentStep === 0 && !values.provider) {
-          const numberCheck = await mutateCheckNumber({
-            phone: cleanNumber(values.phone),
-          });
-          if (numberCheck.exists) {
-            setError('phone', {
-              message: 'Esse número já está em uso',
-            });
             return;
           }
         }
