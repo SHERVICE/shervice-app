@@ -19,6 +19,7 @@
     "@react-navigation/bottom-tabs": "^7.3.10",
     "@react-navigation/elements": "^2.3.8",
     "@react-navigation/native": "^7.1.6",
+    "@sentry/react-native": "^7.3.0",
     "@shopify/flash-list": "1.7.6",
     "@tanstack/react-query": "^5.81.5",
     "axios": "^1.10.0",
