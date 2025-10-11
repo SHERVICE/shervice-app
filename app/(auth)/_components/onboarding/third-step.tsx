@@ -146,13 +146,13 @@ export default function ThirdStep() {
   };
 
   useEffect(() => {
-    if (currentStep === 2) {
+    if (currentStep === 1) {
       setIsVisible(true);
     }
-    if (currentStep !== 2 && stepPhoneNumber !== 'ALERT') {
+    if (currentStep !== 1 && stepPhoneNumber !== 'ALERT') {
       setStepPhoneNumber(NumberCheck.ALERT);
     }
-    if (currentStep === 2 && stepPhoneNumber === NumberCheck.ENABLE) {
+    if (currentStep === 1 && stepPhoneNumber === NumberCheck.ENABLE) {
       setTimerActive(true);
     }
   }, [currentStep, stepPhoneNumber]);

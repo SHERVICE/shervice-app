@@ -1,4 +1,4 @@
-import { ProviderSession } from '@/schemas/signup';
+import { ProviderSession } from '@/schemas/signin';
 import api from '@/services/api';
 import { useMutation } from '@tanstack/react-query';
 
@@ -22,7 +22,6 @@ export interface User {
   providerAccountId: string | null;
   serviceProvider: boolean;
   cpfCnpj: string;
-  address: Address;
 }
 
 export interface UserResponse {
@@ -31,7 +30,6 @@ export interface UserResponse {
   email: string;
   phone: string;
   photo: string | null;
-  address: Address;
 }
 
 export function useSignupMutation() {

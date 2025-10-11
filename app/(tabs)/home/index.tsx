@@ -7,11 +7,12 @@ import { ScrollView, TouchableHighlight, View } from 'react-native';
 /** Icon */
 import Bell from '@/assets/header/bell';
 import Filter from '@/assets/icons/button/filter';
-import LocationIcon from '@/assets/icons/home/location.svg';
+import HelloIcon from '@/assets/icons/home/hello.svg';
+import { UserResponse } from '@/store/session/useSignup';
 import { useCategories } from '@/store/useCategories';
-import { useAuthTokens } from '@/utils/getToken';
 import { AxiosError } from 'axios';
 import { useEffect } from 'react';
+import { useMMKVObject } from 'react-native-mmkv';
 import Button from '../../_components/Button';
 import CategoryItem from '../../_components/CategoryItem';
 import Input from '../../_components/Input';
@@ -30,10 +31,10 @@ function HomeScreen() {
     }
   }, [error]);
 
-  const { accessToken } = useAuthTokens();
+  const [account] = useMMKVObject<UserResponse>('account');
 
   const onPressLocaleArea = () => {
-    if (accessToken) return;
+    if (account) return;
 
     router.navigate('/signup');
   };
@@ -42,14 +43,14 @@ function HomeScreen() {
     <SafeAreaContainer>
       <Flex p={[20, 20, 0, 20]} vertical>
         <TouchableHighlight
-          className="w-full"
+          className="w-full "
           onPress={onPressLocaleArea}
           underlayColor="transparent"
         >
           <Flex gap={10} narrow>
-            {accessToken && (
+            {account && (
               <View className="w-[40px]	h-[40px] bg-primary5  rounded-[10] flex justify-center items-center">
-                <LocationIcon width={15} height={15} />
+                <HelloIcon width={20} height={20} />
               </View>
             )}
 
