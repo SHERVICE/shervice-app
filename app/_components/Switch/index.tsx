@@ -36,7 +36,12 @@ const Switch: React.FC<SwitchProps> = ({
   const translateX = useSharedValue(value ? maxTranslate : 0);
 
   useEffect(() => {
-    translateX.value = withSpring(value ? maxTranslate : 0, { damping: 15 });
+    translateX.value = withSpring(value ? maxTranslate : 0, {
+      damping: 22,
+      stiffness: 250,
+      mass: 0.6,
+      overshootClamping: true,
+    });
   }, [value]);
 
   const animatedThumb = useAnimatedStyle(() => ({

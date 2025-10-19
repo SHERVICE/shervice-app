@@ -1,17 +1,29 @@
 import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/theme-provider';
 import { Camera, User } from 'lucide-react-native';
-import { Image, StyleSheet, TouchableHighlight, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  StyleSheet,
+  TouchableHighlight,
+  TouchableHighlightProps,
+  View,
+} from 'react-native';
 import { Flex } from 'react-native-flex';
 
-interface PhotoProps {
+interface PhotoProps extends TouchableHighlightProps {
   profile: string | null;
+  loading?: boolean;
 }
 
-function PhotoEdit({ profile }: PhotoProps) {
+function PhotoEdit({ profile, loading = false, ...rest }: PhotoProps) {
   const { isDark } = useTheme();
   return (
-    <TouchableHighlight style={styles.photoArea} underlayColor="transparent">
+    <TouchableHighlight
+      style={styles.photoArea}
+      underlayColor="transparent"
+      {...rest}
+    >
       <Flex vertical centered vCentered>
         {profile && (
           <Image
@@ -30,6 +42,12 @@ function PhotoEdit({ profile }: PhotoProps) {
         <View style={styles.photoIcon}>
           <Camera size={18} color={Colors.white} />
         </View>
+
+        {loading && (
+          <View style={styles.loading}>
+            <ActivityIndicator color={Colors.primary} />
+          </View>
+        )}
       </Flex>
     </TouchableHighlight>
   );
@@ -61,5 +79,12 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
     borderRadius: 10,
+  },
+  loading: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255, 0.8)',
   },
 });

@@ -24,6 +24,8 @@ type SignupContextData = {
   currentStep: number;
   setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
   flashListRef: React.RefObject<FlatList<any> | null>;
+  lastIdRegistered: string | null;
+  setLastIdRegistered: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 type Address = {
@@ -44,6 +46,7 @@ export function SignupProvider({ children }: SignupProviderProps) {
   const [address, setAddress] = useState<Address | null>(null);
   const [coords, setCoords] = useState<Coordinates | null>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const [lastIdRegistered, setLastIdRegistered] = useState<string | null>(null);
 
   const flashListRef = useRef<FlatList<any>>(null);
 
@@ -54,6 +57,8 @@ export function SignupProvider({ children }: SignupProviderProps) {
       setAddress,
       setCoords,
       currentStep,
+      lastIdRegistered,
+      setLastIdRegistered,
       setCurrentStep,
       flashListRef,
     }),
@@ -63,6 +68,8 @@ export function SignupProvider({ children }: SignupProviderProps) {
       setCoords,
       setAddress,
       currentStep,
+      lastIdRegistered,
+      setLastIdRegistered,
       setCurrentStep,
       flashListRef,
     ],

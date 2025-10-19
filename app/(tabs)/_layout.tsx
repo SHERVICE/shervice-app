@@ -41,6 +41,11 @@ export default function TabLayout() {
           height: 98,
           position: 'absolute',
           borderTopWidth: 0,
+          ...Platform.select({
+            android: {
+              backgroundColor: colors.background,
+            },
+          }),
         },
         ...(Platform.OS === 'ios' && {
           tabBarBackground: () => (
