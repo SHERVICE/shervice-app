@@ -5,7 +5,6 @@ import Successfully from '@/assets/icons/signup/successfully.svg';
 import { Colors } from '@/constants/Colors';
 import { useSignup } from '@/context/signup';
 import { useTheme } from '@/context/theme-provider';
-import { SigninType } from '@/schemas/signin';
 import { SignupValidationCombinedStep } from '@/schemas/signup';
 import { UserResponse } from '@/store/session/useSignup';
 import { useEnableAccount } from '@/store/users/useEnableAccount';
@@ -68,6 +67,8 @@ export default function ThirdStep() {
   const [secondsLeft, setSecondsLeft] = useState(60);
   const [timerActive, setTimerActive] = useState(false);
 
+  const { lastIdRegistered } = useSignup();
+
   const { isDark } = useTheme();
 
   const router = useRouter();
@@ -91,9 +92,7 @@ export default function ThirdStep() {
   const axiosError = error as AxiosError<{ error: string }>;
 
   const code = watch('code');
-  const [, setUser] = useMMKVObject<SigninType>('user');
-  const [account] = useMMKVObject<UserResponse>('account');
-  const [, setAuth] = useMMKVObject('auth');
+  const [account, setAccount] = useMMKVObject<UserResponse>('account');
 
   const [stepPhoneNumber, setStepPhoneNumber] = useState<
     keyof typeof NumberCheck
@@ -106,13 +105,12 @@ export default function ThirdStep() {
       const valid = trigger(['code']);
 
       if (!valid) return;
-      const { accessToken, refreshToken } = await enableAccountMutation({
+      const account = await enableAccountMutation({
         code: code.join(''),
-        userId: account?.id as string,
+        userId: lastIdRegistered as string,
       });
 
-      setAuth({ accessToken, refreshToken });
-      setUser(undefined);
+      setAccount(account);
     } catch (err) {
       if (err instanceof AxiosError) {
         FIELDS.map((_, index) => {

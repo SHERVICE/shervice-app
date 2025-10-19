@@ -69,7 +69,7 @@ function HomeScreen() {
         </TouchableHighlight>
         <Flex fullWidth narrow mt={20} gap={8}>
           <Flex>
-            <Input placeholder="O que você precisa?" autoFocus />
+            <Input placeholder="O que você precisa?" />
           </Flex>
           <Flex narrow width={50}>
             <Button iconLeft={<Filter />} />

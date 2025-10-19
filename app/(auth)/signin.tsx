@@ -115,7 +115,11 @@ export default function Signin() {
                 </>
               ) : (
                 <>
-                  <LoginButtonSocial type="GOOGLE" />
+                  <LoginButtonSocial
+                    type="GOOGLE"
+                    title="Entrar com Google"
+                    onPress={handleSigninGoogle}
+                  />
                 </>
               )}
             </Flex>

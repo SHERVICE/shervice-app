@@ -8,9 +8,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '@/context/theme-provider';
 import { ToastProvider } from '@/context/toast';
 import { requestAndGetLocation } from '@/utils/locale';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import * as Sentry from '@sentry/react-native';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Host } from 'react-native-portalize';
 
 Sentry.init({
@@ -46,23 +48,30 @@ export default Sentry.wrap(function RootLayout() {
   }
 
   return (
-    <ThemeProvider>
-      <SafeAreaProvider>
-        <QueryClientProvider client={queryClient}>
-          <Host>
-            <ToastProvider>
-              <Stack>
-                <Stack.Screen
-                  name="(tabs)"
-                  options={{ headerShown: false, animation: 'none' }}
-                />
-                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="+not-found" />
-              </Stack>
-            </ToastProvider>
-          </Host>
-        </QueryClientProvider>
-      </SafeAreaProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <Host>
+              <BottomSheetModalProvider>
+                <ToastProvider>
+                  <Stack>
+                    <Stack.Screen
+                      name="(tabs)"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                      name="(auth)"
+                      options={{ headerShown: false }}
+                    />
+                    <Stack.Screen name="+not-found" />
+                  </Stack>
+                </ToastProvider>
+              </BottomSheetModalProvider>
+            </Host>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 });

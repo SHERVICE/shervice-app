@@ -58,11 +58,7 @@ function Category() {
         </Flex>
         <Flex fullWidth narrow mt={20} gap={8}>
           <Flex>
-            <Input
-              placeholder="Buscar"
-              autoFocus
-              onChangeText={(e) => setSeach(e)}
-            />
+            <Input placeholder="Buscar" onChangeText={(e) => setSeach(e)} />
           </Flex>
           <Flex narrow width={50}>
             <Button iconLeft={<Filter />} />

@@ -1,6 +1,5 @@
 import { useSignup } from '@/context/signup';
-import { usePhoneNumberCheck } from '@/store/phone/useCheckNumber';
-import { UserResponse, useSignupMutation } from '@/store/session/useSignup';
+import { useSignupMutation } from '@/store/session/useSignup';
 import { cleanNumber } from '@/utils/cleanNumber';
 import { ErrorsEnum } from '@/utils/errors';
 import { AxiosError } from 'axios';
@@ -8,7 +7,6 @@ import { useNavigation } from 'expo-router';
 import { useFormContext } from 'react-hook-form';
 import { FlatList } from 'react-native';
 import { Flex } from 'react-native-flex';
-import { useMMKVObject } from 'react-native-mmkv';
 import {
   SignupValidationCombinedStep,
   stepFields,
@@ -27,13 +25,11 @@ const steps = [
 ];
 
 export default function OnBoarding() {
-  const { currentStep, setCurrentStep, flashListRef } = useSignup();
+  const { currentStep, setCurrentStep, flashListRef, setLastIdRegistered } =
+    useSignup();
 
   const { mutateAsync: signupMutationAsyn, isPending } = useSignupMutation();
-  const { mutateAsync: mutateCheckNumber } = usePhoneNumberCheck();
   const navigate = useNavigation();
-
-  const [, setAccount] = useMMKVObject<UserResponse>('account');
 
   const { watch, trigger, setError } =
     useFormContext<SignupValidationCombinedStep>();
@@ -41,7 +37,7 @@ export default function OnBoarding() {
   const values = watch();
 
   const createUserInSecondStep = async () => {
-    const data = await signupMutationAsyn({
+    const user = await signupMutationAsyn({
       name: values.name,
       cpfCnpj: cleanNumber(values.cpfCnpj),
       email: values.email,
@@ -53,8 +49,7 @@ export default function OnBoarding() {
       provider: values.provider,
       providerAccountId: values.providerAccountId,
     });
-
-    setAccount(data);
+    setLastIdRegistered(user.id);
   };
 
   const next = async () => {
