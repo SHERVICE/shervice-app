@@ -352,7 +352,11 @@ function ProfileScreen() {
             </TouchableHighlight>
           </Flex>
           <Flex narrow vCentered fullWidth>
-            <TouchableHighlight style={styles.button}>
+            <TouchableHighlight
+              style={styles.button}
+              onPress={() => router.push('/profile/privacy')}
+              underlayColor="transparent"
+            >
               <Flex narrow fullWidth spaceBetween>
                 <Flex gap={16} narrow>
                   <TermsIcon color={isDark ? Colors.white : Colors.black} />
@@ -405,7 +409,7 @@ function ProfileScreen() {
           }}
           handleIndicatorStyle={{
             width: 40,
-            backgroundColor: isDark ? Colors.white : Colors.gray.gray20,
+            backgroundColor: Colors.gray.gray20,
           }}
           onChange={handleSheetChange}
         >
