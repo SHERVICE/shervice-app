@@ -24,12 +24,23 @@ export interface User {
   cpfCnpj: string;
 }
 
+interface ProviderProfile {
+  id: string;
+  userId: string;
+  cpfCnpj: string;
+  coverImage: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface UserResponse {
   id: string;
   name: string;
   email: string;
   phone: string;
   photo: string | null;
+  customer: null;
+  providerProfile: null | ProviderProfile;
 }
 
 export function useSignupMutation() {

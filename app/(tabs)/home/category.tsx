@@ -1,26 +1,33 @@
 import Button from '@/app/_components/Button';
-import Header from '@/app/_components/Header';
 import Heading from '@/app/_components/Heading';
 import Input from '@/app/_components/Input';
 import SafeAreaContainer from '@/app/_components/SafeAreaContainer';
 import Filter from '@/assets/icons/button/filter';
 import { Colors } from '@/constants/Colors';
 import { Categories, useCategories } from '@/store/useCategories';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import { useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { StyleSheet, TouchableHighlight, View } from 'react-native';
 import { Flex } from 'react-native-flex';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SvgUri } from 'react-native-svg';
+import { useDebounce } from 'use-debounce';
 
 function Category() {
+  const navigation = useNavigation();
+
   const [search, setSeach] = useState<string>();
+  const [professionalSearched, { isPending }] = useDebounce(search, 500);
 
   const { categoryId, title } = useLocalSearchParams();
   const { data: subCategories, refetch } = useCategories({
     categoryId: categoryId as string,
-    title: search,
+    title: professionalSearched,
   });
+
+  const insets = useSafeAreaInsets();
 
   const renderItem = (props: Categories) => {
     return (
@@ -50,13 +57,18 @@ function Category() {
     refetch();
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      navigation.setOptions({
+        title,
+      });
+    }, [navigation, title]),
+  );
+
   return (
-    <SafeAreaContainer>
-      <Flex p={[10, 20]} vertical fullWidth>
-        <Flex narrow>
-          <Header title={`Serviços de ${title}`} />
-        </Flex>
-        <Flex fullWidth narrow mt={20} gap={8}>
+    <SafeAreaContainer edges={['bottom']}>
+      <Flex p={[insets.top, 20]} vertical fullWidth>
+        <Flex fullWidth narrow mt={50} gap={8}>
           <Flex>
             <Input placeholder="Buscar" onChangeText={(e) => setSeach(e)} />
           </Flex>

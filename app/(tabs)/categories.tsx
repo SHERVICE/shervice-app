@@ -1,46 +1,99 @@
-import Header from '@/app/_components/Header';
 import Heading from '@/app/_components/Heading';
-import Input from '@/app/_components/Input';
-import SafeAreaContainer from '@/app/_components/SafeAreaContainer';
 import { Colors } from '@/constants/Colors';
+import { useSearch } from '@/context/search';
+import { useTheme } from '@/context/theme-provider';
 import { Categories, useCategories } from '@/store/useCategories';
 import { FlashList } from '@shopify/flash-list';
 import { useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { MotiView } from 'moti';
+import { Skeleton } from 'moti/skeleton';
 import { StyleSheet, TouchableHighlight, View } from 'react-native';
 import { Flex } from 'react-native-flex';
+import Animated, { FadeInUp } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SvgUri } from 'react-native-svg';
+import { useDebounce } from 'use-debounce';
+import ExpandingSearchIcon from '../_components/Search';
 
 function CategoryScreen() {
-  const [search, setSeach] = useState<string>();
+  const { isDark } = useTheme();
 
   const { categoryId } = useLocalSearchParams();
-  const { data: subCategories, refetch } = useCategories({
+
+  const { query } = useSearch();
+  const [categorySearched, { isPending }] = useDebounce(query, 600);
+  const {
+    data: subCategories,
+    refetch,
+    isLoading,
+    isFetching,
+  } = useCategories({
     categoryId: categoryId as string,
-    title: search,
+    title: categorySearched.trim(),
   });
 
-  const renderItem = (props: Categories) => {
+  const insets = useSafeAreaInsets();
+
+  const CategorySkeleton = ({ isDark }: { isDark: boolean }) => {
+    const colorMode = isDark ? 'dark' : 'light';
     return (
-      <TouchableHighlight style={styles.categoryItem}>
-        <Flex vCentered gap={10}>
-          <View style={styles.categoryFigure}>
-            <SvgUri uri={props.figure} width={40} height={40} />
-          </View>
-          <View style={styles.categoryTitle}>
-            <Heading size={16} fontFamily="PoppinsRegular">
-              {props.title}
-            </Heading>
-            <Heading
-              size={14}
-              fontFamily="PoppinsRegular"
-              color={Colors.gray500}
-            >
-              {`${props.quantityProvider} prestadore(s)`}
-            </Heading>
-          </View>
-        </Flex>
-      </TouchableHighlight>
+      <MotiView
+        animate={{ opacity: 1 }}
+        from={{ opacity: 0 }}
+        transition={{ type: 'spring', duration: 400 }}
+        style={[styles.container]}
+      >
+        {Array.from({ length: 5 }).map((_, i) => (
+          <MotiView
+            key={i}
+            from={{ opacity: 0, translateY: 10 }}
+            animate={{ opacity: 1, translateY: 0 }}
+            transition={{
+              delay: i * 200,
+              duration: 1300,
+              repeat: Infinity,
+              repeatReverse: true,
+            }}
+            style={styles.categoryItem}
+          >
+            <Skeleton colorMode={colorMode} width={60} height={60} />
+            <Flex vertical gap={5} vCentered>
+              <Skeleton colorMode={colorMode} width={'80%'} height={20} />
+              <Skeleton colorMode={colorMode} width={'60%'} height={20} />
+            </Flex>
+          </MotiView>
+        ))}
+      </MotiView>
+    );
+  };
+
+  const renderItem = (props: Categories & { index: number }) => {
+    return (
+      <Animated.View
+        entering={FadeInUp.delay(props.index * 100)
+          .duration(400)
+          .damping(12)}
+      >
+        <TouchableHighlight style={styles.categoryItem}>
+          <Flex vCentered gap={10}>
+            <View style={styles.categoryFigure}>
+              <SvgUri uri={props.figure} width={40} height={40} />
+            </View>
+            <View style={styles.categoryTitle}>
+              <Heading size={16} fontFamily="PoppinsRegular">
+                {props.title}
+              </Heading>
+              <Heading
+                size={14}
+                fontFamily="PoppinsRegular"
+                color={Colors.gray500}
+              >
+                {`${props.quantityProvider} prestadore(s)`}
+              </Heading>
+            </View>
+          </Flex>
+        </TouchableHighlight>
+      </Animated.View>
     );
   };
 
@@ -49,32 +102,33 @@ function CategoryScreen() {
   };
 
   return (
-    <SafeAreaContainer>
-      <Flex p={[10, 20]} vertical fullWidth>
-        <Flex narrow>
-          <Header title={`Todas Categorias`} />
-        </Flex>
-        <Flex fullWidth narrow mt={20} gap={8}>
-          <Flex>
-            <Input
-              placeholder="Buscar"
-              autoFocus
-              onChangeText={(e) => setSeach(e)}
-            />
-          </Flex>
-        </Flex>
-        <Flex mt={30}>
+    <Flex p={[insets.top + 15, 20]} vertical fullWidth>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          alignContent: 'flex-end',
+          width: '100%',
+        }}
+      >
+        <Heading style={styles.title}>Todas categorias</Heading>
+        <ExpandingSearchIcon />
+      </View>
+      <Flex mb={30} mt={20}>
+        {isLoading || isFetching || isPending() ? (
+          <CategorySkeleton isDark={isDark} />
+        ) : (
           <FlashList
             data={subCategories?.data || []}
             estimatedItemSize={20}
-            renderItem={({ item }) => renderItem(item)}
+            renderItem={({ item, index }) => renderItem({ ...item, index })}
             refreshing={false}
             onRefresh={refreshData}
             showsVerticalScrollIndicator={false}
           />
-        </Flex>
+        )}
       </Flex>
-    </SafeAreaContainer>
+    </Flex>
   );
 }
 
@@ -104,5 +158,22 @@ export const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 5,
     justifyContent: 'center',
+  },
+  shape: {
+    justifyContent: 'center',
+    height: 250,
+    width: 250,
+    borderRadius: 25,
+    marginRight: 10,
+    backgroundColor: 'white',
+  },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  title: {
+    position: 'absolute',
+    top: 5,
+    left: 0,
   },
 });
