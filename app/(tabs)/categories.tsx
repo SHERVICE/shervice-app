@@ -1,5 +1,4 @@
 import Heading from '@/app/_components/Heading';
-import SafeAreaContainer from '@/app/_components/SafeAreaContainer';
 import { Colors } from '@/constants/Colors';
 import { useSearch } from '@/context/search';
 import { useTheme } from '@/context/theme-provider';
@@ -14,6 +13,7 @@ import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SvgUri } from 'react-native-svg';
 import { useDebounce } from 'use-debounce';
+import ExpandingSearchIcon from '../_components/Search';
 
 function CategoryScreen() {
   const { isDark } = useTheme();
@@ -29,7 +29,7 @@ function CategoryScreen() {
     isFetching,
   } = useCategories({
     categoryId: categoryId as string,
-    title: categorySearched,
+    title: categorySearched.trim(),
   });
 
   const insets = useSafeAreaInsets();
@@ -102,24 +102,33 @@ function CategoryScreen() {
   };
 
   return (
-    <SafeAreaContainer>
-      <Flex p={[insets.top, 20]} vertical fullWidth>
-        <Flex mb={30}>
-          {isLoading || isFetching || isPending() ? (
-            <CategorySkeleton isDark={isDark} />
-          ) : (
-            <FlashList
-              data={subCategories?.data || []}
-              estimatedItemSize={20}
-              renderItem={({ item, index }) => renderItem({ ...item, index })}
-              refreshing={false}
-              onRefresh={refreshData}
-              showsVerticalScrollIndicator={false}
-            />
-          )}
-        </Flex>
+    <Flex p={[insets.top + 15, 20]} vertical fullWidth>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'flex-end',
+          alignContent: 'flex-end',
+          width: '100%',
+        }}
+      >
+        <Heading style={styles.title}>Todas categorias</Heading>
+        <ExpandingSearchIcon />
+      </View>
+      <Flex mb={30} mt={20}>
+        {isLoading || isFetching || isPending() ? (
+          <CategorySkeleton isDark={isDark} />
+        ) : (
+          <FlashList
+            data={subCategories?.data || []}
+            estimatedItemSize={20}
+            renderItem={({ item, index }) => renderItem({ ...item, index })}
+            refreshing={false}
+            onRefresh={refreshData}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
       </Flex>
-    </SafeAreaContainer>
+    </Flex>
   );
 }
 
@@ -161,5 +170,10 @@ export const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+  },
+  title: {
+    position: 'absolute',
+    top: 5,
+    left: 0,
   },
 });

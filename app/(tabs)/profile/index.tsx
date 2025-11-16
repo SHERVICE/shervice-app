@@ -1,15 +1,11 @@
 import Button from '@/app/_components/Button';
 import Heading from '@/app/_components/Heading';
 import SafeAreaContainer from '@/app/_components/SafeAreaContainer';
-import Switch from '@/app/_components/Switch';
 import { Toast } from '@/app/_components/Toast';
-import LogoutIcon from '@/assets/icons/profile/logout';
-import TermsIcon from '@/assets/icons/profile/terms';
 import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/context/theme-provider';
 import { UploadFile, usePhotoEdit } from '@/store/customer/usePhoto';
 import { UserResponse } from '@/store/session/useSignup';
-import { useAuthTokens } from '@/utils/getToken';
 import { openAppSettings } from '@/utils/openSettings';
 import {
   checkGalleryPermission,
@@ -22,15 +18,7 @@ import BottomSheet, {
 } from '@gorhom/bottom-sheet';
 import { AxiosError } from 'axios';
 import { useRouter } from 'expo-router';
-import {
-  BookImage,
-  Camera,
-  ChevronRight,
-  Eye,
-  LockKeyhole,
-  MapPin,
-  SquarePen,
-} from 'lucide-react-native';
+import { BookImage, Camera } from 'lucide-react-native';
 import { useCallback, useRef } from 'react';
 import {
   Image,
@@ -45,14 +33,14 @@ import { useMMKVObject } from 'react-native-mmkv';
 import { Portal } from 'react-native-portalize';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import CameraModal from './_components/cam';
+import OptionsCustomerProfile from './_components/customer/customer-options';
 import PhotoEdit from './_components/photo';
+import ProfileProvider from './_components/provider/profile';
 
 function ProfileScreen() {
-  const { toggleTheme, isDark } = useTheme();
+  const { isDark } = useTheme();
 
   const router = useRouter();
-
-  const { setToken } = useAuthTokens();
 
   const insets = useSafeAreaInsets();
 
@@ -68,11 +56,6 @@ function ProfileScreen() {
    */
   const { mutateAsync: mutationChangePhoto, isPending: isPendingChangePhoto } =
     usePhotoEdit();
-
-  const onLogout = () => {
-    setAccount(undefined);
-    setToken(undefined);
-  };
 
   const pickAndUploadImage = async () => {
     try {
@@ -236,6 +219,10 @@ function ProfileScreen() {
     );
   }
 
+  if (account.providerProfile?.id) {
+    return <ProfileProvider />;
+  }
+
   return (
     <SafeAreaContainer>
       <Flex p={[15, 20]} vertical gap={10} narrow mb={40}>
@@ -259,141 +246,7 @@ function ProfileScreen() {
         </Flex>
       </Flex>
       <ScrollView>
-        <Flex narrow p={[0, 20]} vertical gap={20}>
-          <Flex narrow vCentered fullWidth>
-            <TouchableHighlight style={styles.button}>
-              <Flex narrow fullWidth spaceBetween>
-                <Flex gap={16} narrow>
-                  <SquarePen
-                    color={isDark ? Colors.white : Colors.black}
-                    size={24}
-                  />
-                  <Heading size={16} fontFamily="PoppinsRegular">
-                    Editar Perfil
-                  </Heading>
-                </Flex>
-                <Flex narrow>
-                  <ChevronRight
-                    color={isDark ? Colors.white : Colors.black}
-                    size={24}
-                  />
-                </Flex>
-              </Flex>
-            </TouchableHighlight>
-          </Flex>
-          <Flex narrow vCentered fullWidth>
-            <TouchableHighlight style={styles.button}>
-              <Flex narrow fullWidth spaceBetween>
-                <Flex gap={16} narrow>
-                  <LockKeyhole
-                    color={isDark ? Colors.white : Colors.black}
-                    size={24}
-                  />
-                  <Heading size={16} fontFamily="PoppinsRegular">
-                    Alterar a senha
-                  </Heading>
-                </Flex>
-                <Flex narrow>
-                  <ChevronRight
-                    color={isDark ? Colors.white : Colors.black}
-                    size={24}
-                  />
-                </Flex>
-              </Flex>
-            </TouchableHighlight>
-          </Flex>
-          <Flex narrow vCentered fullWidth>
-            <TouchableHighlight style={styles.button}>
-              <Flex narrow fullWidth spaceBetween>
-                <Flex gap={16} narrow>
-                  <MapPin
-                    color={isDark ? Colors.white : Colors.black}
-                    size={24}
-                  />
-                  <Heading size={16} fontFamily="PoppinsRegular">
-                    Meus Endereços
-                  </Heading>
-                </Flex>
-                <Flex narrow>
-                  <ChevronRight
-                    color={isDark ? Colors.white : Colors.black}
-                    size={24}
-                  />
-                </Flex>
-              </Flex>
-            </TouchableHighlight>
-          </Flex>
-          <Flex narrow vCentered fullWidth>
-            <TouchableHighlight style={styles.button}>
-              <Flex narrow fullWidth spaceBetween>
-                <Flex gap={16} narrow>
-                  <Eye color={isDark ? Colors.white : Colors.black} size={24} />
-                  <Heading size={16} fontFamily="PoppinsRegular">
-                    Modo Escuro
-                  </Heading>
-                </Flex>
-                <Flex narrow>
-                  {/* <Switch
-                    value={isDark}
-                    onChange={() => toggleTheme()}
-                    trackColor={{ true: Colors.primary }}
-                  /> */}
-                  <Switch
-                    value={isDark}
-                    onValueChange={() => toggleTheme()}
-                    // trackColor={{ true: Colors.primary }}
-                    trackColor={{
-                      true: Colors.primary,
-                      false: Colors.gray.gray80,
-                    }}
-                  />
-                </Flex>
-              </Flex>
-            </TouchableHighlight>
-          </Flex>
-          <Flex narrow vCentered fullWidth>
-            <TouchableHighlight
-              style={styles.button}
-              onPress={() => router.push('/profile/privacy')}
-              underlayColor="transparent"
-            >
-              <Flex narrow fullWidth spaceBetween>
-                <Flex gap={16} narrow>
-                  <TermsIcon color={isDark ? Colors.white : Colors.black} />
-                  <Heading size={16} fontFamily="PoppinsRegular">
-                    Política de Privacidade
-                  </Heading>
-                </Flex>
-                <Flex narrow>
-                  <ChevronRight
-                    color={isDark ? Colors.white : Colors.black}
-                    size={24}
-                  />
-                </Flex>
-              </Flex>
-            </TouchableHighlight>
-          </Flex>
-          <Flex narrow vCentered fullWidth>
-            <TouchableHighlight
-              style={[styles.button, styles.noBorder]}
-              onPress={onLogout}
-              underlayColor="transparent"
-            >
-              <Flex narrow fullWidth spaceBetween>
-                <Flex gap={16} narrow>
-                  <LogoutIcon color={Colors.red} />
-                  <Heading
-                    size={16}
-                    fontFamily="PoppinsRegular"
-                    color={Colors.red}
-                  >
-                    Sair
-                  </Heading>
-                </Flex>
-              </Flex>
-            </TouchableHighlight>
-          </Flex>
-        </Flex>
+        <OptionsCustomerProfile />
       </ScrollView>
       <Portal>
         <BottomSheet

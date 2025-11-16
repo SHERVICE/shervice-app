@@ -43,6 +43,7 @@ export default function TabLayout() {
   return (
     <SearchProvider>
       <Tabs
+        initialRouteName="home"
         screenOptions={{
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.text,
@@ -100,7 +101,7 @@ export default function TabLayout() {
         {tabs.map((tab) => {
           const activeTab = segments.find((item) => item.includes(tab.name));
           const isActive = activeTab === tab.name;
-          const showHeader = tab.name === 'categories';
+          const showHeader = tab.name === 'teste';
           return (
             <Tabs.Screen
               key={tab.name}
@@ -122,9 +123,7 @@ export default function TabLayout() {
                   fontSize: 16,
                   color: colors.text,
                 },
-                headerStyle: {
-                  height: 100,
-                },
+
                 headerLeft: (props) =>
                   props.canGoBack && (
                     <TouchableHighlight

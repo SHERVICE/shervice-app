@@ -4,7 +4,6 @@ import { SearchIcon, X } from 'lucide-react-native';
 import React, { useEffect, useRef } from 'react';
 import {
   Dimensions,
-  Platform,
   Pressable,
   StyleSheet,
   TextInput,
@@ -20,60 +19,49 @@ import Animated, {
 } from 'react-native-reanimated';
 
 export default function ExpandingSearchIcon() {
-  const screenWidth = Dimensions.get('window').width - 34;
+  const screenWidth = Dimensions.get('window').width - 40;
   const inputRef = useRef<TextInput>(null);
-
   const { query, setQuery, searchActive, setSearchActive } = useSearch();
 
-  const width = useSharedValue(searchActive ? screenWidth : 50);
-
-  const {
-    theme: { colors },
-  } = useTheme();
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    width: withTiming(width.value, {
-      duration: 300,
-      easing: Easing.out(Easing.cubic),
-    }),
-  }));
-
-  const inputAnimatedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(width.value, [50, screenWidth], [0, 1]);
-    return { opacity };
-  });
+  const width = useSharedValue(50);
+  const { theme } = useTheme();
+  const { colors } = theme;
 
   useEffect(() => {
-    width.value = searchActive ? screenWidth : 50;
+    width.value = withTiming(searchActive ? screenWidth : 50, {
+      duration: 400,
+      easing: Easing.out(Easing.exp), // curva mais natural
+    });
 
     if (searchActive) {
       runOnJS(() => inputRef.current?.focus())();
+    } else {
+      runOnJS(() => inputRef.current?.blur())();
     }
   }, [searchActive, screenWidth, width]);
 
+  const animatedStyle = useAnimatedStyle(() => ({
+    width: width.value,
+  }));
+
+  const inputAnimatedStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(width.value, [50, screenWidth * 0.7], [0, 1]);
+    return { opacity };
+  });
+
   const onBlur = () => {
     if (searchActive && query.length <= 0) {
-      width.value = withTiming(50, {
-        easing: Easing.out(Easing.cubic),
-      });
-      setSearchActive((prev) => !prev);
+      setSearchActive(false);
     }
   };
 
   const onClose = () => {
+    inputRef.current?.focus();
     setQuery('');
   };
 
-  const onFocus = () => {
-    width.value = searchActive ? screenWidth : 50;
-
-    if (searchActive) {
-      runOnJS(() => inputRef.current?.focus())();
-    }
-  };
-
   return (
-    <View style={{ paddingRight: 20 }}>
+    <View>
       <Pressable onPress={() => setSearchActive(true)}>
         <Animated.View
           style={[
@@ -82,32 +70,42 @@ export default function ExpandingSearchIcon() {
             { backgroundColor: searchActive ? colors.card : 'transparent' },
           ]}
         >
-          <View style={styles.iconWrapper}>
+          <View
+            style={[
+              styles.iconWrapper,
+              { position: 'absolute', opacity: searchActive ? 0 : 1 },
+            ]}
+          >
             <SearchIcon
               color={searchActive ? '#898A83' : colors.text}
               size={22}
               strokeWidth={3}
             />
           </View>
-          {searchActive && (
-            <Animated.View style={[styles.inputWrapper, inputAnimatedStyle]}>
-              <TextInput
-                ref={inputRef}
-                value={query}
-                onChangeText={(text) => setQuery(text)}
-                placeholder="Buscar..."
-                onBlur={onBlur}
-                onFocus={onFocus}
-                placeholderTextColor="#898A83"
-                style={[styles.input]}
+
+          <Animated.View style={[styles.inputWrapper, inputAnimatedStyle]}>
+            <View style={[styles.iconWrapper]}>
+              <SearchIcon
+                color={searchActive ? '#898A83' : colors.text}
+                size={22}
+                strokeWidth={3}
               />
-            </Animated.View>
-          )}
-          {query.length > 0 && (
-            <Pressable onPress={onClose} style={styles.rightIcon}>
-              <X size={18} color="#898A83" strokeWidth={3} />
-            </Pressable>
-          )}
+            </View>
+            <TextInput
+              ref={inputRef}
+              value={query}
+              onChangeText={setQuery}
+              placeholder="Buscar..."
+              onBlur={onBlur}
+              placeholderTextColor="#898A83"
+              style={styles.input}
+            />
+            {query.length > 0 && (
+              <Pressable onPress={onClose} style={styles.rightIcon}>
+                <X size={18} color="#898A83" strokeWidth={3} />
+              </Pressable>
+            )}
+          </Animated.View>
         </Animated.View>
       </Pressable>
     </View>
@@ -123,7 +121,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    marginRight: 0,
   },
   iconWrapper: {
     width: 30,
@@ -133,19 +130,18 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     flex: 1,
+    flexDirection: 'row',
+    gap: 5,
   },
   input: {
     fontSize: 16,
     color: '#898A83',
     paddingVertical: 0,
     textAlignVertical: 'center',
-    ...Platform.select({ android: { paddingVertical: 0 } }),
+    flex: 1,
   },
   rightIcon: {
-    position: 'absolute',
-    right: 10,
-    top: 0,
-    bottom: 0,
+    width: 36,
     justifyContent: 'center',
     alignItems: 'center',
   },
