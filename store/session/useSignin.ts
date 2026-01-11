@@ -27,6 +27,7 @@ type Provider = {
 export interface UserResponse {
   name: string;
   phoneVerification: boolean;
+  phone: string;
   id: string;
   photo: string | null;
   customer: Customer | null;

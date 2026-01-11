@@ -17,6 +17,7 @@ import { Toast } from '../_components/Toast';
 import LoginButtonSocial from './_components/login-button-social';
 
 import { GOOGLE_WEB_CLIENT, IOS_GOOGLE_CLIENT } from '@/const/vars';
+import { useSignup } from '@/context/signup';
 import {
   GoogleSignin,
   isSuccessResponse,
@@ -35,6 +36,28 @@ export default function Signin() {
 
   const [, setAccount] = useMMKVObject<UserResponse>('account');
 
+  const { setCurrentStep, setLastIdRegistered } = useSignup();
+
+  /**
+   * Redirect to active account
+   */
+
+  const checkAccountActive = (account: UserResponse) => {
+    if (!account.phoneVerification) {
+      setCurrentStep(1);
+      setLastIdRegistered(account.id);
+      router.push({
+        pathname: '/(auth)/_components/onboarding/third-step',
+        params: { phone: account.phone, id: account.id },
+      });
+      return;
+    }
+
+    setAccount(account);
+    router.dismissAll();
+    router.push('/(tabs)/profile');
+  };
+
   const form = useForm<SigninType>({
     resolver: zodResolver(SigninSchema),
   });
@@ -42,8 +65,7 @@ export default function Signin() {
   const onSubmit = async (data: SigninType) => {
     try {
       const account = await signinMutation(data);
-      setAccount(account);
-      router.replace('/(tabs)/profile');
+      checkAccountActive(account);
     } catch (err) {
       if (err instanceof AxiosError) {
         Toast.error(err.response?.data?.error || 'Aconteceu algo de errado');
@@ -64,9 +86,13 @@ export default function Signin() {
           provider: ProviderSession.GOOGLE,
           password: null,
         });
-        setAccount(account);
-        router.dismissAll();
-        router.push('/(tabs)/profile');
+
+        if (!account) {
+          Toast.error('Erro ao autenticar com Google');
+          return;
+        }
+
+        checkAccountActive(account);
       }
     } catch (err) {
       if (err instanceof AxiosError) {

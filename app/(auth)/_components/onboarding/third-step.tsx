@@ -1,18 +1,19 @@
 import Button from '@/app/_components/Button';
 import Heading from '@/app/_components/Heading';
 import Input from '@/app/_components/Input';
+import { Toast } from '@/app/_components/Toast';
 import Successfully from '@/assets/icons/signup/successfully.svg';
 import { Colors } from '@/constants/Colors';
 import { useSignup } from '@/context/signup';
 import { useTheme } from '@/context/theme-provider';
 import { SignupValidationCombinedStep } from '@/schemas/signup';
-import { UserResponse } from '@/store/session/useSignup';
+import { UserResponse } from '@/store/session/useSignin';
 import { useEnableAccount } from '@/store/users/useEnableAccount';
 import { useRefreshCode } from '@/store/users/useRefreshCode';
 import { maskPhoneCustom } from '@/utils/maskPhone';
 import { AxiosError } from 'axios';
 import { BlurView } from 'expo-blur';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import {
@@ -89,27 +90,30 @@ export default function ThirdStep() {
   } = useEnableAccount();
   const { mutateAsync: refreshCodeMutation } = useRefreshCode();
 
+  const { phone } = useLocalSearchParams<{
+    phone?: string;
+  }>();
+
   const axiosError = error as AxiosError<{ error: string }>;
 
   const code = watch('code');
-  const [account, setAccount] = useMMKVObject<UserResponse>('account');
+  const [, setAccount] = useMMKVObject<UserResponse>('account');
 
   const [stepPhoneNumber, setStepPhoneNumber] = useState<
     keyof typeof NumberCheck
   >(NumberCheck.ALERT);
 
-  const phoneNumber = watch('phone');
+  const phoneNumber = phone ?? watch('phone');
 
   const enableAccount = async () => {
     try {
-      const valid = trigger(['code']);
-
+      const valid = await trigger(['code']);
       if (!valid) return;
+
       const account = await enableAccountMutation({
         code: code.join(''),
         userId: lastIdRegistered as string,
       });
-
       setAccount(account);
     } catch (err) {
       if (err instanceof AxiosError) {
@@ -120,9 +124,15 @@ export default function ThirdStep() {
     }
   };
 
+  const checkIfResendCodeAutomatic = () => {
+    if (phone) {
+      resendCodeOtp();
+    }
+  };
+
   const resendCodeOtp = async () => {
     try {
-      await refreshCodeMutation({ userId: account?.id ?? '' });
+      await refreshCodeMutation({ userId: lastIdRegistered as string });
       setSecondsLeft(60);
       setTimerActive(true);
       reset();
@@ -133,7 +143,9 @@ export default function ThirdStep() {
       inputRefs.current[0]?.focus();
     } catch (err) {
       if (err instanceof AxiosError) {
-        console.log(err);
+        Toast.error(
+          err.response?.data?.error || 'Aconteceu algo de errado ao reenviar',
+        );
       }
     }
   };
@@ -218,7 +230,10 @@ export default function ThirdStep() {
                   <Flex>
                     <Button
                       title="Continuar"
-                      onPress={() => setStepPhoneNumber(NumberCheck.ENABLE)}
+                      onPress={() => {
+                        setStepPhoneNumber(NumberCheck.ENABLE);
+                        checkIfResendCodeAutomatic();
+                      }}
                     ></Button>
                   </Flex>
                 </Flex>
@@ -254,13 +269,24 @@ export default function ThirdStep() {
                               keyboardType="numeric"
                               onBlur={onBlur}
                               onChangeText={(text) => {
-                                onChange(text);
-
-                                if (text && index < FIELDS.length - 1) {
+                                const char = text.slice(-1);
+                                onChange(char);
+                                if (char && index < FIELDS.length - 1) {
                                   inputRefs.current[index + 1]?.focus();
                                 }
-                                if (!text && index > 0) {
-                                  inputRefs.current[index - 1]?.focus();
+                              }}
+                              onKeyPress={({ nativeEvent }) => {
+                                if (nativeEvent.key !== 'Backspace') return;
+
+                                if (value) {
+                                  onChange('');
+                                  return;
+                                }
+
+                                if (index > 0) {
+                                  const prevIndex = index - 1;
+                                  setValue(`code.${prevIndex}`, '');
+                                  inputRefs.current[prevIndex]?.focus();
                                 }
                               }}
                               value={value}
@@ -282,7 +308,7 @@ export default function ThirdStep() {
                     />
                   </Flex>
                   <Flex narrow fullWidth>
-                    <Heading size={11} color={Colors.red} align="left">
+                    <Heading size={11} color={Colors.red} align="center">
                       {axiosError?.response?.data.error}
                     </Heading>
                   </Flex>

@@ -21,7 +21,7 @@ export default function BannerProfile() {
 
 const styles = StyleSheet.create({
   banner: {
-    height: 220,
+    height: 180,
     width: '100%',
     position: 'relative',
   },
