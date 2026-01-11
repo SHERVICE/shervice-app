@@ -1,4 +1,3 @@
-import { useTheme } from '@/context/theme-provider';
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetBackdropProps,
@@ -25,10 +24,6 @@ const CameraModal = ({ onPhotoTaken, sheetRef }: CameraModalProps) => {
   const camera = useRef<Camera>(null);
   const [camPosition, setCamPosition] = useState<CameraPosition>('front'); // 'front' ou 'back'
   const device = useCameraDevice(camPosition);
-  const {
-    isDark,
-    theme: { colors },
-  } = useTheme();
 
   const handleBackdropPress = useCallback(() => {
     sheetRef.current?.close();
