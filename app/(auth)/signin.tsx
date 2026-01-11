@@ -4,7 +4,7 @@ import { UserResponse, useSigninMutation } from '@/store/session/useSignin';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
 import { Link, useRouter } from 'expo-router';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useFormContext } from 'react-hook-form';
 import { Image, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Flex } from 'react-native-flex';
 import { useMMKVObject } from 'react-native-mmkv';
@@ -18,6 +18,8 @@ import LoginButtonSocial from './_components/login-button-social';
 
 import { GOOGLE_WEB_CLIENT, IOS_GOOGLE_CLIENT } from '@/const/vars';
 import { useSignup } from '@/context/signup';
+import { SignupValidationCombinedStep } from '@/schemas/signup';
+import { useFindUserByEmail } from '@/store/users/useFindUserByEmail';
 import {
   GoogleSignin,
   isSuccessResponse,
@@ -34,9 +36,13 @@ export default function Signin() {
   const { mutateAsync: signinMutation, isPending: isPendingSignin } =
     useSigninMutation();
 
+  const { mutateAsync: findUserByEmail } = useFindUserByEmail();
+
   const [, setAccount] = useMMKVObject<UserResponse>('account');
 
   const { setCurrentStep, setLastIdRegistered } = useSignup();
+
+  const { reset } = useFormContext<SignupValidationCombinedStep>();
 
   /**
    * Redirect to active account
@@ -79,21 +85,43 @@ export default function Signin() {
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
 
-      if (isSuccessResponse(response)) {
-        const account = await signinMutation({
+      const userExists = await findUserByEmail({
+        email: response.data?.user.email ?? '',
+      });
+
+      if (!isSuccessResponse(response)) {
+        Toast.error('Falha ao autenticar com Google');
+        return;
+      }
+
+      if (!userExists.exists) {
+        reset({
           email: response.data.user.email,
+          name: response.data.user.name ?? '',
+          photo: response.data.user.photo,
           token: response.data.idToken,
           provider: ProviderSession.GOOGLE,
-          password: null,
+          isProvider: false,
+          hasCNPJ: false,
+          providerAccountId: response.data.user.id,
         });
-
-        if (!account) {
-          Toast.error('Erro ao autenticar com Google');
-          return;
-        }
-
-        checkAccountActive(account);
+        router.navigate('/(auth)/onboarding');
+        return;
       }
+
+      const account = await signinMutation({
+        email: response.data.user.email,
+        token: response.data.idToken,
+        provider: ProviderSession.GOOGLE,
+        password: null,
+      });
+
+      if (!account) {
+        Toast.error('Erro ao autenticar com Google');
+        return;
+      }
+
+      checkAccountActive(account);
     } catch (err) {
       if (err instanceof AxiosError) {
         Toast.error(err.response?.data?.error || 'Aconteceu algo de errado');
