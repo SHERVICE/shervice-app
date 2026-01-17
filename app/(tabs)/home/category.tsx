@@ -1,14 +1,13 @@
-import Button from '@/app/_components/Button';
 import Heading from '@/app/_components/Heading';
-import Input from '@/app/_components/Input';
 import SafeAreaContainer from '@/app/_components/SafeAreaContainer';
-import Filter from '@/assets/icons/button/filter';
+import ExpandingSearchIcon from '@/app/_components/Search';
+import PrevIcon from '@/assets/header/prev';
 import { Colors } from '@/constants/Colors';
+import { useSearch } from '@/context/search';
+import { useTheme } from '@/context/theme-provider';
 import { Categories, useCategories } from '@/store/useCategories';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
-import { useLocalSearchParams } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { StyleSheet, TouchableHighlight, View } from 'react-native';
 import { Flex } from 'react-native-flex';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,17 +15,19 @@ import { SvgUri } from 'react-native-svg';
 import { useDebounce } from 'use-debounce';
 
 function Category() {
-  const navigation = useNavigation();
-
-  const [search, setSeach] = useState<string>();
-  const [professionalSearched, { isPending }] = useDebounce(search, 500);
+  const navigate = useNavigation();
+  const { query } = useSearch();
+  const [searchService] = useDebounce(query, 500);
 
   const { categoryId, title } = useLocalSearchParams();
   const { data: subCategories, refetch } = useCategories({
     categoryId: categoryId as string,
-    title: professionalSearched,
+    title: searchService,
   });
 
+  const {
+    theme: { colors },
+  } = useTheme();
   const insets = useSafeAreaInsets();
 
   const renderItem = (props: Categories) => {
@@ -57,25 +58,36 @@ function Category() {
     refetch();
   };
 
-  useFocusEffect(
-    useCallback(() => {
-      navigation.setOptions({
-        title,
-      });
-    }, [navigation, title]),
-  );
+  const onPressBack = () => {
+    navigate.goBack();
+  };
 
   return (
     <SafeAreaContainer edges={['bottom']}>
-      <Flex p={[insets.top, 20]} vertical fullWidth>
-        <Flex fullWidth narrow mt={50} gap={8}>
-          <Flex>
-            <Input placeholder="Buscar" onChangeText={(e) => setSeach(e)} />
-          </Flex>
-          <Flex narrow width={50}>
-            <Button iconLeft={<Filter />} />
-          </Flex>
-        </Flex>
+      <Flex p={[insets.top + 10, 20]} vertical fullWidth>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignContent: 'flex-end',
+            alignItems: 'center',
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          <TouchableHighlight
+            style={styles.buttonHeader}
+            onPress={onPressBack}
+            underlayColor="transparent"
+          >
+            <PrevIcon color={colors.text} />
+          </TouchableHighlight>
+          <Heading>{title}</Heading>
+
+          <View style={{ position: 'absolute', right: 0 }}>
+            <ExpandingSearchIcon />
+          </View>
+        </View>
         <Flex mt={30}>
           <FlashList
             data={subCategories?.data || []}
@@ -116,5 +128,18 @@ export const styles = StyleSheet.create({
     flexDirection: 'column',
     gap: 5,
     justifyContent: 'center',
+  },
+  title: {
+    position: 'absolute',
+    top: 5,
+    left: 0,
+  },
+  buttonHeader: {
+    minWidth: 40,
+    height: 44,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    position: 'absolute',
+    left: 0,
   },
 });

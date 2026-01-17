@@ -43,8 +43,7 @@ export default function Signup() {
   const { email } = watch();
 
   const { mutateAsync: findUserByEmail, isPending } = useFindUserByEmail();
-  const { mutateAsync: signinMutation, isPending: isPendingSignin } =
-    useSigninMutation();
+  const { mutateAsync: signinMutation } = useSigninMutation();
 
   const handleSignupGoogle = async () => {
     try {
